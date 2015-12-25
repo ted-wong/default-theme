@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "name": "Theme",
+  "main": "index.html",
+  "devDependencies": {
+    "autoprefixer": "^6.1.0",
+    "cssnano": "^3.3.2",
+    "grunt": "~0.4.5",
+    "grunt-cli": "~0.1.13",
+    "grunt-postcss": "^0.7.1",
+    "load-grunt-tasks": "~3.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yoav-zibin/default-theme.git"
+  },
+  "author": "Yoav Zibin",
+  "license": "BSD-2-Clause"
+}

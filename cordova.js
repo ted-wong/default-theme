@@ -1691,7 +1691,7 @@ exports.injectScript = function(url, onload, onerror) {
     script.src = url;
     console.log("Not injectScript (just calling onload): ", arguments, url, script.src);
     //document.head.appendChild(script);
-    onload();
+    setTimeout(onload, 1);
 };
 
 function injectIfNecessary(id, url, onload, onerror) {

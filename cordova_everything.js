@@ -1977,3 +1977,614 @@ window.cordova = require('cordova');
 require('cordova/init');
 
 })();
+;cordova.define('cordova/plugin_list', function(require, exports, module) {
+module.exports = [
+    {
+        "file": "plugins/org.apache.cordova.splashscreen/www/splashscreen.js",
+        "id": "org.apache.cordova.splashscreen.SplashScreen",
+        "clobbers": [
+            "navigator.splashscreen"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-whitelist/whitelist.js",
+        "id": "cordova-plugin-whitelist.whitelist",
+        "runs": true
+    },
+    {
+        "file": "plugins/cordova-plugin-facebook4/www/facebook-native.js",
+        "id": "cordova-plugin-facebook4.FacebookConnectPlugin",
+        "clobbers": [
+            "facebookConnectPlugin"
+        ]
+    },
+    {
+        "file": "plugins/phonegap-plugin-push/www/push.js",
+        "id": "phonegap-plugin-push.PushNotification",
+        "clobbers": [
+            "PushNotification"
+        ]
+    },
+    {
+        "file": "plugins/com.darktalker.cordova.screenshot/www/Screenshot.js",
+        "id": "com.darktalker.cordova.screenshot.screenshot",
+        "merges": [
+            "navigator.screenshot"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-x-socialsharing/www/SocialSharing.js",
+        "id": "cordova-plugin-x-socialsharing.SocialSharing",
+        "clobbers": [
+            "window.plugins.socialsharing"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-customurlscheme/www/android/LaunchMyApp.js",
+        "id": "cordova-plugin-customurlscheme.LaunchMyApp",
+        "clobbers": [
+            "window.plugins.launchmyapp"
+        ]
+    }
+];
+module.exports.metadata =
+// TOP OF METADATA
+{
+    "org.apache.cordova.splashscreen": "1.0.0",
+    "cordova-plugin-whitelist": "1.2.0",
+    "cordova-plugin-facebook4": "1.4.1",
+    "phonegap-plugin-push": "1.5.2",
+    "com.darktalker.cordova.screenshot": "0.1.3",
+    "cordova-plugin-x-socialsharing": "5.0.7.1",
+    "cordova-plugin-customurlscheme": "4.0.0"
+}
+// BOTTOM OF METADATA
+});
+;cordova.define("cordova-plugin-customurlscheme.LaunchMyApp", function(require, exports, module) { (function () {
+    "use strict";
+
+    // TODO(yoav): this was in an android package, maybe it's only for android? test it on ios.
+  var remainingAttempts = 10;
+
+  function waitForAndCallHandlerFunction(url) {
+    if (typeof window.handleOpenURL == "function") {
+      window.handleOpenURL(url);
+    } else if (remainingAttempts-- > 0) {
+      setTimeout(function(){waitForAndCallHandlerFunction(url)}, 500);
+    }
+  }
+
+  function triggerOpenURL() {
+    cordova.exec(
+        waitForAndCallHandlerFunction,
+        null,
+        "LaunchMyApp",
+        "checkIntent",
+        []);
+  }
+
+  document.addEventListener("deviceready", triggerOpenURL, false);
+}());
+
+});
+;cordova.define("com.darktalker.cordova.screenshot.screenshot", function(require, exports, module) { /*
+ *  This code is adapted from the work of Michael Nachbaur
+ *  by Simon Madine of The Angry Robot Zombie Factory
+ *   - Converted to Cordova 1.6.1 by Josemando Sobral.
+ *   - Converted to Cordova 2.0.0 by Simon MacDonald
+ *  2012-07-03
+ *  MIT licensed
+ */
+var exec = require('cordova/exec'), formats = ['png','jpg'];
+module.exports = {
+	save:function(callback,format,quality, filename) {
+		format = (format || 'png').toLowerCase();
+		filename = filename || 'screenshot_'+Math.round((+(new Date()) + Math.random()));
+		if(formats.indexOf(format) === -1){
+			return callback && callback(new Error('invalid format '+format));
+		}
+		quality = typeof(quality) !== 'number'?100:quality;
+		exec(function(res){
+			callback && callback(null,res);
+		}, function(error){
+			callback && callback(error);
+		}, "Screenshot", "saveScreenshot", [format, quality, filename]);
+	},
+
+	URI:function(callback, quality){
+		quality = typeof(quality) !== 'number'?100:quality;
+		exec(function(res){
+			callback && callback(null, res);
+		}, function(error){
+			callback && callback(error);
+		}, "Screenshot", "getScreenshotAsURI", [quality]);
+
+	}
+};
+
+});
+;cordova.define("cordova-plugin-x-socialsharing.SocialSharing", function(require, exports, module) { var cordova = require('cordova');
+
+function SocialSharing() {
+}
+
+// Override this method (after deviceready) to set the location where you want the iPad popup arrow to appear.
+// If not overridden with different values, the popup is not used. Example:
+//
+//   window.plugins.socialsharing.iPadPopupCoordinates = function() {
+//     return "100,100,200,300";
+//   };
+SocialSharing.prototype.iPadPopupCoordinates = function () {
+  // left,top,width,height
+  return "-1,-1,-1,-1";
+};
+
+SocialSharing.prototype.setIPadPopupCoordinates = function (coords) {
+  // left,top,width,height
+  cordova.exec(function() {}, this._getErrorCallback(function() {}, "setIPadPopupCoordinates"), "SocialSharing", "setIPadPopupCoordinates", [coords]);
+};
+
+SocialSharing.prototype.available = function (callback) {
+  cordova.exec(function (avail) {
+    callback(avail ? true : false);
+  }, null, "SocialSharing", "available", []);
+};
+
+SocialSharing.prototype.share = function (message, subject, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "share"), "SocialSharing", "share", [message, subject, this._asArray(fileOrFileArray), url]);
+};
+
+SocialSharing.prototype.shareViaTwitter = function (message, file /* multiple not allowed by twitter */, url, successCallback, errorCallback) {
+  var fileArray = this._asArray(file);
+  var ecb = this._getErrorCallback(errorCallback, "shareViaTwitter");
+  if (fileArray.length > 1) {
+    ecb("shareViaTwitter supports max one file");
+  } else {
+    cordova.exec(successCallback, ecb, "SocialSharing", "shareViaTwitter", [message, null, fileArray, url]);
+  }
+};
+
+SocialSharing.prototype.shareViaFacebook = function (message, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaFacebook"), "SocialSharing", "shareViaFacebook", [message, null, this._asArray(fileOrFileArray), url]);
+};
+
+SocialSharing.prototype.shareViaFacebookWithPasteMessageHint = function (message, fileOrFileArray, url, pasteMessageHint, successCallback, errorCallback) {
+  pasteMessageHint = pasteMessageHint || "If you like you can paste a message from your clipboard";
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaFacebookWithPasteMessageHint"), "SocialSharing", "shareViaFacebookWithPasteMessageHint", [message, null, this._asArray(fileOrFileArray), url, pasteMessageHint]);
+};
+
+SocialSharing.prototype.shareViaWhatsApp = function (message, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaWhatsApp"), "SocialSharing", "shareViaWhatsApp", [message, null, this._asArray(fileOrFileArray), url, null]);
+};
+
+SocialSharing.prototype.shareViaWhatsAppToReceiver = function (receiver, message, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaWhatsAppToReceiver"), "SocialSharing", "shareViaWhatsApp", [message, null, this._asArray(fileOrFileArray), url, receiver]);
+};
+
+SocialSharing.prototype.shareViaSMS = function (options, phonenumbers, successCallback, errorCallback) {
+  var opts = options;
+  if (typeof options == "string") {
+    opts = {"message":options}; // for backward compatibility as the options param used to be the message
+  }
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaSMS"), "SocialSharing", "shareViaSMS", [opts, phonenumbers]);
+};
+
+SocialSharing.prototype.shareViaEmail = function (message, subject, toArray, ccArray, bccArray, fileOrFileArray, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaEmail"), "SocialSharing", "shareViaEmail", [message, subject, this._asArray(toArray), this._asArray(ccArray), this._asArray(bccArray), this._asArray(fileOrFileArray)]);
+};
+
+SocialSharing.prototype.canShareVia = function (via, message, subject, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "canShareVia"), "SocialSharing", "canShareVia", [message, subject, this._asArray(fileOrFileArray), url, via]);
+};
+
+SocialSharing.prototype.canShareViaEmail = function (successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "canShareViaEmail"), "SocialSharing", "canShareViaEmail", []);
+};
+
+SocialSharing.prototype.shareViaInstagram = function (message, fileOrFileArray, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareViaInstagram"), "SocialSharing", "shareViaInstagram", [message, null, this._asArray(fileOrFileArray), null]);
+};
+
+SocialSharing.prototype.shareVia = function (via, message, subject, fileOrFileArray, url, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "shareVia"), "SocialSharing", "shareVia", [message, subject, this._asArray(fileOrFileArray), url, via]);
+};
+
+SocialSharing.prototype.saveToPhotoAlbum = function (fileOrFileArray, successCallback, errorCallback) {
+  cordova.exec(successCallback, this._getErrorCallback(errorCallback, "saveToPhotoAlbum"), "SocialSharing", "saveToPhotoAlbum", [this._asArray(fileOrFileArray)]);
+};
+
+SocialSharing.prototype._asArray = function (param) {
+  if (param == null) {
+    param = [];
+  } else if (typeof param === 'string') {
+    param = new Array(param);
+  }
+  return param;
+};
+
+SocialSharing.prototype._getErrorCallback = function (ecb, functionName) {
+  if (typeof ecb === 'function') {
+    return ecb;
+  } else {
+    return function (result) {
+      console.log("The injected error callback of '" + functionName + "' received: " + JSON.stringify(result));
+    }
+  }
+};
+
+SocialSharing.install = function () {
+  if (!window.plugins) {
+    window.plugins = {};
+  }
+
+  window.plugins.socialsharing = new SocialSharing();
+  return window.plugins.socialsharing;
+};
+
+cordova.addConstructor(SocialSharing.install);
+
+});
+;cordova.define("cordova-plugin-facebook4.FacebookConnectPlugin", function(require, exports, module) { var exec = require('cordova/exec')
+
+exports.getLoginStatus = function getLoginStatus (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'getLoginStatus', [])
+}
+
+exports.showDialog = function showDialog (options, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'showDialog', [options])
+}
+
+exports.login = function login (permissions, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'login', permissions)
+}
+
+exports.logEvent = function logEvent (name, params, valueToSum, s, f) {
+  // Prevent NSNulls getting into iOS, messes up our [command.argument count]
+  if (!params && !valueToSum) {
+    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name])
+  } else if (params && !valueToSum) {
+    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name, params])
+  } else if (params && valueToSum) {
+    exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name, params, valueToSum])
+  } else {
+    f('Invalid arguments')
+  }
+}
+
+exports.logPurchase = function logPurchase (value, currency, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'logPurchase', [value, currency])
+}
+
+exports.getAccessToken = function getAccessToken (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'getAccessToken', [])
+}
+
+exports.logout = function logout (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'logout', [])
+}
+
+exports.api = function api (graphPath, permissions, s, f) {
+  permissions = permissions || []
+  exec(s, f, 'FacebookConnectPlugin', 'graphApi', [graphPath, permissions])
+}
+
+exports.appInvite = function appLinks (options, s, f) {
+  options = options || {}
+  exec(s, f, 'FacebookConnectPlugin', 'appInvite', [options])
+}
+
+});
+;cordova.define("phonegap-plugin-push.PushNotification", function(require, exports, module) { /* global cordova:false */
+/* globals window */
+
+/*!
+ * Module dependencies.
+ */
+
+var exec = cordova.require('cordova/exec');
+
+/**
+ * PushNotification constructor.
+ *
+ * @param {Object} options to initiate Push Notifications.
+ * @return {PushNotification} instance that can be monitored and cancelled.
+ */
+
+var PushNotification = function(options) {
+    this._handlers = {
+        'registration': [],
+        'notification': [],
+        'error': []
+    };
+
+    // require options parameter
+    if (typeof options === 'undefined') {
+        throw new Error('The options argument is required.');
+    }
+
+    // store the options to this object instance
+    this.options = options;
+
+    // triggered on registration and notification
+    var that = this;
+    var success = function(result) {
+        if (result && typeof result.registrationId !== 'undefined') {
+            that.emit('registration', result);
+        } else if (result && result.additionalData && typeof result.additionalData.callback !== 'undefined') {
+            var executeFunctionByName = function(functionName, context /*, args */) {
+                var args = Array.prototype.slice.call(arguments, 2);
+                var namespaces = functionName.split('.');
+                var func = namespaces.pop();
+                for (var i = 0; i < namespaces.length; i++) {
+                    context = context[namespaces[i]];
+                }
+                return context[func].apply(context, args);
+            };
+
+            executeFunctionByName(result.additionalData.callback, window, result);
+        } else if (result) {
+            that.emit('notification', result);
+        }
+    };
+
+    // triggered on error
+    var fail = function(msg) {
+        var e = (typeof msg === 'string') ? new Error(msg) : msg;
+        that.emit('error', e);
+    };
+
+    // wait at least one process tick to allow event subscriptions
+    setTimeout(function() {
+        exec(success, fail, 'PushNotification', 'init', [options]);
+    }, 10);
+};
+
+/**
+ * Unregister from push notifications
+ */
+
+PushNotification.prototype.unregister = function(successCallback, errorCallback, options) {
+    if (!errorCallback) { errorCallback = function() {}; }
+
+    if (typeof errorCallback !== 'function')  {
+        console.log('PushNotification.unregister failure: failure parameter not a function');
+        return;
+    }
+
+    if (typeof successCallback !== 'function') {
+        console.log('PushNotification.unregister failure: success callback parameter must be a function');
+        return;
+    }
+
+    var that = this;
+    var cleanHandlersAndPassThrough = function() {
+        if (!options) {
+            that._handlers = {
+                'registration': [],
+                'notification': [],
+                'error': []
+            };
+        }
+        successCallback();
+    };
+
+    exec(cleanHandlersAndPassThrough, errorCallback, 'PushNotification', 'unregister', [options]);
+};
+
+/**
+ * Call this to set the application icon badge
+ */
+
+PushNotification.prototype.setApplicationIconBadgeNumber = function(successCallback, errorCallback, badge) {
+    if (!errorCallback) { errorCallback = function() {}; }
+
+    if (typeof errorCallback !== 'function')  {
+        console.log('PushNotification.setApplicationIconBadgeNumber failure: failure parameter not a function');
+        return;
+    }
+
+    if (typeof successCallback !== 'function') {
+        console.log('PushNotification.setApplicationIconBadgeNumber failure: success callback parameter must be a function');
+        return;
+    }
+
+    exec(successCallback, errorCallback, 'PushNotification', 'setApplicationIconBadgeNumber', [{badge: badge}]);
+};
+
+/**
+ * Get the application icon badge
+ */
+
+PushNotification.prototype.getApplicationIconBadgeNumber = function(successCallback, errorCallback) {
+    if (!errorCallback) { errorCallback = function() {}; }
+
+    if (typeof errorCallback !== 'function')  {
+        console.log('PushNotification.getApplicationIconBadgeNumber failure: failure parameter not a function');
+        return;
+    }
+
+    if (typeof successCallback !== 'function') {
+        console.log('PushNotification.getApplicationIconBadgeNumber failure: success callback parameter must be a function');
+        return;
+    }
+
+    exec(successCallback, errorCallback, 'PushNotification', 'getApplicationIconBadgeNumber', []);
+};
+
+/**
+ * Listen for an event.
+ *
+ * The following events are supported:
+ *
+ *   - registration
+ *   - notification
+ *   - error
+ *
+ * @param {String} eventName to subscribe to.
+ * @param {Function} callback triggered on the event.
+ */
+
+PushNotification.prototype.on = function(eventName, callback) {
+    if (this._handlers.hasOwnProperty(eventName)) {
+        this._handlers[eventName].push(callback);
+    }
+};
+
+/**
+ * Remove event listener.
+ *
+ * @param {String} eventName to match subscription.
+ * @param {Function} handle function associated with event.
+ */
+
+PushNotification.prototype.off = function (eventName, handle) {
+    if (this._handlers.hasOwnProperty(eventName)) {
+        var handleIndex = this._handlers[eventName].indexOf(handle);
+        if (handleIndex >= 0) {
+            this._handlers[eventName].splice(handleIndex, 1);
+        }
+    }
+};
+
+/**
+ * Emit an event.
+ *
+ * This is intended for internal use only.
+ *
+ * @param {String} eventName is the event to trigger.
+ * @param {*} all arguments are passed to the event listeners.
+ *
+ * @return {Boolean} is true when the event is triggered otherwise false.
+ */
+
+PushNotification.prototype.emit = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var eventName = args.shift();
+
+    if (!this._handlers.hasOwnProperty(eventName)) {
+        return false;
+    }
+
+    for (var i = 0, length = this._handlers[eventName].length; i < length; i++) {
+        this._handlers[eventName][i].apply(undefined,args);
+    }
+
+    return true;
+};
+
+PushNotification.prototype.finish = function(successCallback, errorCallback) {
+    if (!successCallback) { successCallback = function() {}; }
+    if (!errorCallback) { errorCallback = function() {}; }
+
+    if (typeof successCallback !== 'function') {
+        console.log('finish failure: success callback parameter must be a function');
+        return;
+    }
+
+    if (typeof errorCallback !== 'function')  {
+        console.log('finish failure: failure parameter not a function');
+        return;
+    }
+
+    exec(successCallback, errorCallback, 'PushNotification', 'finish', []);
+};
+
+/*!
+ * Push Notification Plugin.
+ */
+
+module.exports = {
+    /**
+     * Register for Push Notifications.
+     *
+     * This method will instantiate a new copy of the PushNotification object
+     * and start the registration process.
+     *
+     * @param {Object} options
+     * @return {PushNotification} instance
+     */
+
+    init: function(options) {
+        return new PushNotification(options);
+    },
+
+    hasPermission: function(successCallback, errorCallback) {
+        exec(successCallback, errorCallback, 'PushNotification', 'hasPermission', []);
+    },
+
+    /**
+     * PushNotification Object.
+     *
+     * Expose the PushNotification object for direct use
+     * and testing. Typically, you should use the
+     * .init helper method.
+     */
+
+    PushNotification: PushNotification
+};
+
+});
+;cordova.define("org.apache.cordova.splashscreen.SplashScreen", function(require, exports, module) { /*
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+*/
+
+var exec = require('cordova/exec');
+
+var splashscreen = {
+    show:function() {
+        exec(null, null, "SplashScreen", "show", []);
+    },
+    hide:function() {
+        exec(null, null, "SplashScreen", "hide", []);
+    }
+};
+
+module.exports = splashscreen;
+
+});
+;cordova.define("cordova-plugin-whitelist.whitelist", function(require, exports, module) { /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+*/
+
+if (!document.querySelector('meta[http-equiv=Content-Security-Policy]')) {
+    var msg = 'No Content-Security-Policy meta tag found. Please add one when using the cordova-plugin-whitelist plugin.';
+    console.error(msg);
+    setInterval(function() {
+        console.warn(msg);
+    }, 10000);
+}
+
+});

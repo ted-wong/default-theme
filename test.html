@@ -14,17 +14,14 @@
         </style>
     </head>
     <body>
-      <script src="cordova.js"></script>
-      <script src="cordova_plugins.js"></script>
-      <script src="plugins/org.apache.cordova.splashscreen/www/splashscreen.js"></script>
-      <script src="plugins/cordova-plugin-whitelist/whitelist.js"></script>
-      <script src="plugins/cordova-plugin-facebook4/www/facebook-native.js"></script>
-      <script src="plugins/phonegap-plugin-push/www/push.js"></script>
-      <script src="plugins/com.darktalker.cordova.screenshot/www/Screenshot.js"></script>
-      <script src="plugins/cordova-plugin-x-socialsharing/www/SocialSharing.js"></script>
-      <script src="plugins/cordova-plugin-customurlscheme/www/android/LaunchMyApp.js"></script>
+      <!--
+      I just need to concatenate all files together :)
+      // Wrap in a setTimeout to support the use-case of having plugin JS appended to cordova.js.
+      // The delay allows the attached modules to be defined before the plugin loader looks for them.
+      -->
+      <script src="cordova_everything.js"></script>
 
-        Yoav Test 7<br>
+        Yoav Test 8<br>
 
         <script>
         function onDeviceReady() {

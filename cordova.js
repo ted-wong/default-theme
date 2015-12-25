@@ -1688,7 +1688,7 @@ exports.injectScript = function(url, onload, onerror) {
     script.onload = onload;
     // onerror fires for malformed URLs.
     script.onerror = onerror;
-    script.src = url.replace("file:///android_asset/www/", "");
+    script.src = url;
     console.log("injectScript: ", arguments, url, script.src);
     document.head.appendChild(script);
 };

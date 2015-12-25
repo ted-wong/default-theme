@@ -1689,8 +1689,9 @@ exports.injectScript = function(url, onload, onerror) {
     // onerror fires for malformed URLs.
     script.onerror = onerror;
     script.src = url;
-    console.log("YES injectScript: ", arguments, url, script.src);
-    document.head.appendChild(script);
+    console.log("Not injectScript (just calling onload): ", arguments, url, script.src);
+    //document.head.appendChild(script);
+    onload();
 };
 
 function injectIfNecessary(id, url, onload, onerror) {

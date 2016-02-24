@@ -2,83 +2,51 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    copy: {
-      imgs: {
-        expand: true,
-        src: 'imgs/*.*',
-        dest: 'dist/'
+    ts: {
+      default: {
+        options: {
+          fast: 'never' // disable the grunt-ts fast feature
+        },
+        tsconfig: true
       }
-    },
-    concat: {
-      options: {
-        separator: ';',
-      },
-      js: {
-        src: [
-          'cordova.js',
-          'cordova_plugins.js',
-          'plugins/*.js'],
-        dest: 'cordova_everything.js',
-      },
     },
     postcss: {
       options: {
         map: {
           inline: false, // save all sourcemaps as separate files...
-          annotation: 'dist/css/maps/' // ...to the specified directory
         },
         processors: [
           require('autoprefixer')(), // add vendor prefixes
           require('cssnano')() // minify the result
         ]
       },
-      dist: {
-        src: 'css/game.css',
-        dest: 'dist/css/everything.min.css',
-      }
-    },
-    uglify: {
-      options: {
-        sourceMap: true,
+      app: {
+        src: 'app/css/app.css',
+        dest: 'app/css/app.min.css',
       },
-      my_target: {
-        files: {
-          'dist/js/everything.min.js': ['dist/js/everything.js']
-        }
-      }
-    },
-    processhtml: {
-      dist: {
-        files: {
-          'dist/index.min.html': ['index.html']
-        }
-      }
+      gamedeveloper: {
+        src: 'gamedeveloper/css/gameDeveloper.css',
+        dest: 'gamedeveloper/css/gameDeveloper.min.css',
+      },
+      gameinvite: {
+        src: 'gameinvite/css/index.css',
+        dest: 'gameinvite/css/index.min.css',
+      },
     },
     manifest: {
       generate: {
         options: {
           basePath: '.',
           cache: [
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.min.js',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular-touch.min.js',
-            'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js',
-            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css',
-            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.woff',
-            'http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.ttf',
-            'http://yoav-zibin.github.io/emulator/dist/turnBasedServices.3.min.js',
-            'http://yoav-zibin.github.io/emulator/main.css',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js',
             'js/everything.min.js',
-            'css/everything.min.css',
-            'imgs/HelpSlide1.png',
-            'imgs/HelpSlide2.png'
+            'css/app.min.css',
           ],
-          network: [
-            'js/everything.min.js.map',
-            'js/everything.js'
-          ],
+          network: ['*'],
           timestamp: true
         },
-        dest: 'dist/index.min.appcache',
+        dest: 'app/index.appcache',
         src: []
       }
     },
@@ -114,10 +82,9 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', [
-      'karma',
-      'copy',
-      'concat', 'postcss', 'uglify',
-      'processhtml', 'manifest',
+      'ts',
+      'postcss',
+      'manifest',
       'http-server', 'protractor']);
 
 };

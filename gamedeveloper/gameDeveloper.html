@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-strict-di>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Developer site</title>
+  <meta name="description" content="Social games">
+  <link rel="shortcut icon"type="image/x-icon" href="data:image/x-icon;,"><!-- Suppress browser request for favicon.ico -->
+
+  <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
+  <link rel="stylesheet" href="css/gameDeveloper.min.css"/>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js"></script>
+
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+
+  <script src="js/everything.min.js"></script>
+
+  <!-- only for game developer! (we decode minified stack traces) -->
+  <script src="js/gameDeveloper.min.js"></script>
+
+<script type="text/ng-template" id="html-templates/mainPage.html">
+Empty on purpose: to prevent errors because the router redirects unknown pages to /main:
+otherwise({redirectTo: '/main'});
+</script>
+
+<script type="text/ng-template" id="html-templates/developerBugs.html">
+<h4>Bug reports and user feedback.</h4>
+<table>
+  <tr>
+    <th>Select</th>
+    <th ng-repeat="bugField in developerBugs.bugFields track by $index">
+      <a href="" ng-click="developerBugs.toggleOrderBy(bugField.id)">{{bugField.name}}</a>
+      <span class="sortorder" ng-show="developerBugs.orderByField === bugField.id" ng-class="{reverse:developerBugs.isOrderByDesc}"></span>
+    </th>
+    <th>View more</th>
+  </tr>
+  <tr ng-repeat="bug in developerBugs.bugs | orderBy:developerBugs.orderByField:developerBugs.isOrderByDesc">
+    <td><input type="checkbox" ng-model="bug.isSelected"></td>
+    <td><input type="text" ng-model="bug.label"></td>
+    <td>{{bug.gameId}}</td>
+    <td>{{bug.userFeedback}}</td>
+    <td>{{bug.exception}}</td>
+    <td>{{bug.createdTime | date:'short'}}</td>
+    <td>{{bug.compilationDate}}</td>
+    <td><a ng-click="developerBugs.selectBug(bug)">View more</a></td>
+  </tr>
+</table>
+<button class="btn" ng-click="developerBugs.deleteSelectedBugs()" ng-if="developerBugs.bugs.length">
+  Delete all selected bug reports.
+</button>
+<button class="btn" ng-click="developerBugs.updateSelectedBugs()" ng-if="developerBugs.bugs.length">
+  Update the labels of selected bug reports.
+</button>
+
+<div ng-if="developerBugs.currBug">
+  Cause: <input type="text" style="width:800px" readonly="true" ng-model="developerBugs.currBug.cause">
+  <br>
+  Location (URL): <input type="text" style="width:800px" readonly="true" ng-model="developerBugs.currBug.location">
+  <br>
+  <div ng-if="developerBugs.currBug.stack">
+    Decoded stack: <textarea rows="10" cols="100" ng-model="developerBugs.currBug.decodedStack"></textarea><br>
+    Stack: <textarea rows="10" cols="100" ng-model="developerBugs.currBug.stack"></textarea><br>
+  </div>
+  Navigator: <textarea rows="10" cols="100" ng-model="developerBugs.currBug.navigatorJson"></textarea>
+  <br>
+  Platform logs: <textarea rows="20" cols="100" ng-model="developerBugs.currBug.platformLogsString"></textarea>
+  <br>
+  <div ng-if="developerBugs.currBug.gameLogsString">
+    Game logs: <textarea rows="20" cols="100" ng-model="developerBugs.currBug.gameLogsString"></textarea>
+    <br>
+  </div>
+</div>
+</script>
+
+
+<script type="text/ng-template" id="html-templates/developerCheckEmail.html">
+<h4>Check your email. Within a couple of minutes you should get an email with a link
+  that will allow you to create your game.</h4>
+</script>
+
+
+<script type="text/ng-template" id="html-templates/developerGame.html">
+<div ng-if="developerGame.isLoading">
+  <h4>Loading game...</h4>
+</div>
+<form role="form" ng-submit="developerGame.validateAddOrUpdateGame()" ng-if="!developerGame.isLoading">
+  <h1>Game details</h1>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="developerGame.game.hidePracticeOption">
+      Should hide the practice option, i.e., the option to play against a computer opponent? (Check this if your game does not have an AI.)
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="developerGame.game.hidePassAndPlayOption">
+      Should hide the pass-and-play option, i.e., the option to play multiple players on the same device? (Check this if your game has hidden state, e.g., Poker, so pass-and-play does not make sense.)
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Game URL:
+      <input size="80" type="url" class="form-control" ng-model="developerGame.game.gameUrl" required placeholder="http://...">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Minimum number of players, between 2 and 8 (note that this value cannot be changed after you save this game):
+      <input type="number" class="form-control" ng-model="developerGame.game.minPlayersNum" ng-disabled="!developerGame.isNewGame" required step="1" min="2" max="8" placeholder="2">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Maximum number of players, between 2 and 8 (note that this value cannot be changed after you save this game):
+      <input type="number" class="form-control" ng-model="developerGame.game.maxPlayersNum" ng-disabled="!developerGame.isNewGame" required step="1" min="2" max="8" placeholder="2">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Number of players in an auto-match, between minimum and maximum number of players:
+      <input type="number" class="form-control" ng-model="developerGame.game.autoMatchPlayersNum" required step="1" min="2" max="8" placeholder="2">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Facebook app ID (if none is supplied, then we will use our generic "Multiplayer games" facebook app):
+      <input class="form-control" ng-model="developerGame.game.facebookAppId" placeholder="168248516591227">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Your game width-to-height ratio (in your code, this is the value in <code>resizeGameAreaService.setWidthToHeight(XXX)</code>):
+      <input type="number" class="form-control" ng-model="developerGame.game.widthToHeightRatio" required step="any" min="0.25" max="4" placeholder="1.5">
+    </label>
+  </div>
+
+  <h1>For game invites</h1>
+  <div class="form-group">
+    For creating invite links in your game such as <code>gameinvite.us/?yoav.zibin/tictactoe</code>,
+    you need to supply a lowercase game name, and your package name (for Android) and/or AppStore App ID (for Apple).
+    Your <code>config.xml</code> will use a package name of <code>com.gamingplatform.[lowercase_game_name]</code>,
+    and it will define a Custom URL scheme with that <code>[lowercase_game_name]</code>, e.g., <code>tictactoe://</code><br>
+    E.g., see <a href="https://github.com/yoav-zibin/phonegap-tictactoe/blob/gh-pages/www/config.xml" target="_blank">phonegap-tictactoe project</a>
+    <br>
+    <label>
+      Lowercase game name (must be unique, and match [a-z0-9.]+, i.e., just lowercase a-z letters or digits or dot):
+      <input type="text" pattern="[a-z0-9.]+" class="form-control" ng-model="developerGame.game.lowercaseGameName" required placeholder="tictactoe">
+    </label>
+    <br>
+    <a target="_blank" href="https://play.google.com/store/apps/details?id=com.gamingplatform.{{developerGame.game.lowercaseGameName}}">
+      Clicking here should open your app on Google Play
+    </a>
+  </div>
+  <div class="form-group">
+    <label>
+      [Optional] AppStore App ID (for Apple):
+      <input type="text" pattern="[0-9]+" class="form-control" ng-model="developerGame.game.iosAppId" placeholder="1054830030">
+      <a target="_blank" href="{{'http://itunes.apple.com/app/id' + developerGame.game.iosAppId}}">
+        Clicking here should open your app on Apple AppStore
+      </a>
+    </label>
+  </div>
+
+  <h1>Settings for phonegap</h1>
+  These settings are used for auto generating
+    <code>config.xml</code> and <code>index.html</code>.
+  <br>
+  <div class="form-group">
+    <label>
+      Version number (must be increased every time you submit an app):
+      <input type="number" pattern="[0-9]+" class="form-control" ng-model="developerGame.game.phonegapVersionNumber" required placeholder="1">
+      The version number is used in multiple places in <code>config.xml</code>:
+      widget version and versionCode, and iOS CFBundleShortVersionString.
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      App name (must match <code>[-_ a-zA-Z0-9]+</code>):
+      <input type="text" pattern="[-_ a-zA-Z0-9]+" class="form-control" ng-model="developerGame.game.phonegapAppName" required placeholder="Tic Tac Toe">
+    </label>
+  </div>
+
+  <h1>[Optional] iOS push notifications</h1>
+  <div class="form-group">
+    <label>
+      Your iOS key-store P12 file, used for sending Push Notifications on iOS:
+      <input type="file" accept="*.p12" class="form-control" fileread="developerGame.game.productionIosKeystoreP12Base64" placeholder="Your production iOS key-store P12 file for APNS authentication for Push notifications">
+      <div ng-if = "developerGame.game.productionIosKeystoreP12Base64">
+        (File size is {{developerGame.base64OriginalSizeKb(developerGame.game.productionIosKeystoreP12Base64)}}KB.)
+      </div>
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Your iOS key-store P12 file <b>password</b> (to decrypt the P12 file):
+      <input type="password" class="form-control" ng-model="developerGame.game.productionIosKeystorePassword">
+    </label>
+  </div>
+  <!--
+  <div class="form-group">
+    <label>
+      Your <i>development</i> iOS key-store P12 file, used for sending Push Notifications on iOS:
+      <input type="file" accept="*.p12" class="form-control" fileread="developerGame.game.developmentIosKeystoreP12Base64" placeholder="Your development iOS key-store P12 file for APNS authentication for Push notifications">
+      <div ng-if = "developerGame.game.developmentIosKeystoreP12Base64">
+        (File size is {{developerGame.base64OriginalSizeKb(developerGame.game.developmentIosKeystoreP12Base64)}}KB.)
+      </div>
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      Your <i>development</i> iOS key-store P12 file <b>password</b> (to decrypt the P12 file):
+      <input type="password" class="form-control" ng-model="developerGame.game.developmentIosKeystorePassword">
+    </label>
+  </div>
+  -->
+
+  <h1>I18N and L10N</h1>
+  <div class="form-group">
+    <label>
+      Your game supports these languages:
+      <select ng-model="developerGame.currentLanguage" ng-options="lang as developerGame.getLangCodeAndName(lang) for (lang, value) in developerGame.game.languageToLocalizedGameFields"></select>
+    </label>
+    <button type="button" class="btn" ng-click="developerGame.deleteLanguage()" ng-disabled="developerGame.currentLanguage == 'en'">Delete language</button>
+  </div>
+  <div class="form-group">
+    <label>
+      Add a new language:
+      <select ng-model="developerGame.newLanguage" ng-options="language as developerGame.getLangCodeAndName(language) for language in developerGame.allLanguages"></select>
+    </label>
+    <button type="button" class="btn" ng-click="developerGame.addLanguage()">Click to add {{developerGame.getLangCodeAndName(developerGame.newLanguage)}}</button>
+  </div>
+
+  <h4>Game name</h4>
+  <div class="form-group">
+    <table>
+      <tr>
+        <th ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">{{developerGame.getLangCodeAndName(langCode)}}</th>
+      </tr>
+      <tr>
+        <td ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">
+          <input type="text" required class="form-control" ng-model="lFields.gameName" placeholder="Tic Tac Toe">
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <h4>[Optional] Printscreens</h4>
+  <div class="form-group">
+    [Optional] Game icon URL (50x50 image, less than 5KB), which is shown on <a href="http://gameinvite.us" target="_blank">gameinvite.us</a>:
+    <table>
+      <tr>
+        <th ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">{{developerGame.getLangCodeAndName(langCode)}}</th>
+      </tr>
+      <tr>
+        <td ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">
+          <input size="80" type="url" class="form-control" ng-model="lFields.gameIcon50x50Url" placeholder="http://...">
+          <img ng-src="{{lFields.gameIcon50x50Url}}" ng-if="lFields.gameIcon50x50Url" style="width:50px;height:50px">   
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="form-group">
+    [Optional] Game header URL (320x50 image, less than 50KB), which is shown on <a href="http://gameinvite.us" target="_blank">gameinvite.us</a>:
+    <table>
+      <tr>
+        <th ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">{{developerGame.getLangCodeAndName(langCode)}}</th>
+      </tr>
+      <tr>
+        <td ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">
+          <input size="80" type="url" class="form-control" ng-model="lFields.gameHeader320x50Url" placeholder="http://...">
+          <img ng-src="{{lFields.gameHeader320x50Url}}" ng-if="lFields.gameHeader320x50Url" style="width:320px;height:50px">   
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="form-group">
+    [Optional] Game promotional image/printscreen URL (any dimensions, less than 50KB).
+      For sharing via other apps (e.g., WhatsApp, Hangouts, Facebook, etc),
+    For more info see
+      <a href="https://docs.google.com/document/d/1aN-4dOiHJkGMcTdB4O928bwkn2pRHm4_Y7LlftFNWmQ/edit#heading=h.8hp6yfg4olni"
+        target="_blank">the gameinvite flow in app</a>.
+    <table>
+      <tr>
+        <th ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">{{developerGame.getLangCodeAndName(langCode)}}</th>
+      </tr>
+      <tr>
+        <td ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">         
+          <input size="80" type="url" class="form-control" ng-model="lFields.gameImageForSharingUrl" placeholder="http://...">
+          <img ng-src="{{lFields.gameImageForSharingUrl}}" ng-if="lFields.gameImageForSharingUrl">   
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <h4>[Optional] Player roles</h4>
+  <div class="form-group">
+    Player roles are shown sometimes next to the name of the player (e.g., in Chess the two roles are White and Black):
+    <table>
+      <tr>
+        <th ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields">{{developerGame.getLangCodeAndName(langCode)}}</th>
+      </tr>
+      <tr>
+        <td ng-repeat="(langCode, lFields) in developerGame.game.languageToLocalizedGameFields"> 
+          <input type="text" class="form-control"
+            ng-model="lFields.playerColors[index]"
+            placeholder="White"
+            ng-repeat="index in developerGame.fromTo(0, developerGame.game.maxPlayersNum) track by $index">   
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <h4>[Optional] Theme</h4>
+  <div class="form-group">
+    It's possible to modify the HTML and CSS of the gaming platform by
+    forking
+      <a href="https://github.com/yoav-zibin/default-theme" target="_blank">
+        the default theme
+      </a><br> 
+    (You can look at existing forks to see if you find a theme you like.)
+    Then you can modify your fork, run grunt, and push to github.
+    <br>
+    <label>
+      Enter your github.io URL here:<br>
+      <input size="80" type="url" class="form-control" ng-model="developerGame.game.themeBaseUrl" placeholder="http://yoav-zibin.github.io/default-theme/">
+      <br>
+    </label>
+  </div>
+  
+  <h4>[Optional] Localized text used in push notifications</h4>
+  After forking 
+    <a href="https://github.com/yoav-zibin/default-theme" target="_blank">
+      the default theme
+    </a>, 
+   you can add support for more languages by modifying your l10n files.
+  Because push-notifications should also be localized, you also need to copy-paste the localizations
+  (in all the languages that your game supports)
+  of all the <code>PUSH_NOTIFICATION_**_NOTIFICATION_TITLE</code> and <code>PUSH_NOTIFICATION_**_NOTIFICATION_BODY</code>
+  in this textarea.<br>
+  <textarea rows="10" cols="100" ng-blur="developerGame.validatePushNotificationsL10nsJson()" ng-model="developerGame.pushNotificationsL10nsJson">
+  </textarea><br>
+  For example, if your game supports exactly {{developerGame.getLangCodeAndName('en')}} and {{developerGame.getLangCodeAndName('iw')}} then you could paste this:
+  <br>
+  <textarea readonly rows="3" cols="100" ng-model="developerGame.pushNotificationsL10nsSampleJson">
+  </textarea>
+  <br>
+
+  <button type="submit" class="btn btn-default">{{developerGame.addOrUpdateGameText}}</button>
+  <button type="cancel" class="btn" ng-click="developerGame.gotoMainDeveloperPage()">Cancel</button>
+</form>
+</script>
+
+
+<script type="text/ng-template" id="html-templates/developerLogin.html">
+<h4>Welcome game developer!</h4>
+
+<form role="form">
+  <div class="form-group">
+    <label>
+      Your email address (must match <code>[-_@.a-zA-Z0-9+]+</code>):
+      <input type="email" pattern="[-_@.a-zA-Z0-9+]+" class="form-control" ng-model="developerLogin.email" required placeholder="Enter a valid email address">
+    </label>
+  </div>
+  <button type="submit" class="btn btn-default" ng-click="developerLogin.addGameDeveloper()">Login</button>
+</form>
+</script>
+
+
+<script type="text/ng-template" id="html-templates/developerMain.html">
+<h4>Welcome back game developer!</h4>
+<form role="form" ng-submit="developerMain.updateGameDeveloper()">
+  <label>
+    Email address:
+    <input type="email" class="form-control" ng-model="developerMain.gameDeveloperInfo.gameDeveloperEmail" required placeholder="Fetching your email...">
+  </label>
+  <button type="submit" class="btn btn-default">Update your email</button>
+</form>
+<hr>
+<button class="btn" ng-click="developerMain.gotoDeveloperBugs()" ng-if="developerMain.games.length">
+  See bug reports and user feedback for your games.
+</button>
+<table ng-if="developerMain.games.length">
+  <tr>
+    <th>Update game</th>
+    <th>Test your game inside the platform</th>
+    <th>Phonegap <code>config.xml</code></th>
+  </tr>
+  <tr ng-repeat = "game in developerMain.games track by game.gameId">
+    <td>
+      <a class="list-group-item" ng-click="developerMain.gotoUpdateGame(game)">
+        <h4 class="list-group-item-heading">
+          {{game.gameFields.languageToLocalizedGameFields.en.gameName}}
+        </h4>
+      </a>
+    </td>
+    <td>
+      <a ng-href="{{developerMain.getPlatformUrl(game.gameId)}}" target="_blank">
+        Test in platform
+      </a>
+    </td>
+    <td>
+      <textarea readonly>{{developerMain.getPhonegapConfigXml(game)}}</textarea>
+    </td>
+  </tr>
+</table>
+<br>
+<a class="list-group-item" ng-click="developerMain.addNewGame()">
+  <h4 class="list-group-item-heading">
+    Add new game
+  </h4>
+</a>
+</script>
+
+</head>
+<body ng-cloak>
+  <div class="container-fluid" ng-if="developerMain.shouldShowNgView()">
+    <div ng-view autoscroll=""></div>
+  </div>
+</body>
+</html>

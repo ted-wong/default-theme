@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ng-app="myApp" ng-strict-di>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Game Invite</title>
+  <meta name="description" content="Game Invite">
+  <link rel="shortcut icon"type="image/x-icon" href="data:image/x-icon;,"><!-- Suppress browser request for favicon.ico -->
+
+  <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
+  <link rel="stylesheet" href="css/index.min.css"/>
+</head>
+<body>
+
+<img ng-if="!main.isFinishedLoading()"
+  style="position: absolute; display:block; left: 0; top: 0; right: 0; bottom: 0; margin: auto;"
+  src="imgs/animatedEllipse.gif">
+
+<div ng-if="main.isFinishedLoading()" ng-cloak class="outer">
+<div class="middle">
+<div class="inner">
+
+  <img id="test_gameHeader320x50Url"
+      ng-if="main.gameHeader320x50Url()"
+      ng-src="{{main.gameHeader320x50Url()}}"
+      width="320" height="50"
+      class="gameHeader horizontal-center">
+
+  <table ng-if="main.getAvatarImage()" class="horizontal-center">
+    <td>
+      <img id="test_avatar_image" ng-src="{{main.getAvatarImage()}}" width="50" height="50" class="avatar">
+    </td>
+    <td id="test_invite_text" >
+      {{'GAME_INVITE_PLAYER_NAME_WANTS_TO_PLAY_GAME_NAME_WITH_YOU' | translate}}
+    </td>
+    <td ng-if="main.gameIcon50x50Url() && !main.gameHeader320x50Url()">
+      <img id="test_gameIcon50x50Url" ng-src="{{main.gameIcon50x50Url()}}" width="50" height="50" class="gameIcon">
+    </td>
+  </table>
+
+  <div class="horizontal-center">{{'GAME_INVITE_INSTALL_APP_FROM' | translate}}</div>
+  <div ng-if="!main.isMobile()" class="horizontal-center">
+    <button id="test_open_apple_appstore" ng-if="main.hasIosApp()" class="btn btn-primary"
+        ng-click="main.openLocation('APPLE')">
+      {{'GAME_INVITE_INSTALL_APP_FROM_APPLE_APPSTORE' | translate}}
+    </button>
+    <button id="test_open_google_play" class="btn btn-primary"
+        ng-click="main.openLocation('GOOGLE')">
+      {{'GAME_INVITE_INSTALL_APP_FROM_GOOGLE_PLAY' | translate}}
+    </button>
+  </div>
+
+  <div ng-if="main.isMobile()" class="horizontal-center">
+    <button id="test_openOrInstallApp" class="btn btn-primary" ng-click="main.openOrInstallApp()">
+      {{'GAME_INVITE_OPEN_OR_INSTALL_GAME_NAME' | translate}}
+    </button>
+  </div>
+
+  <select class="languageSelect horizontal-center"
+      ng-if="main.l10n().getSupportedLanguages().length > 1"
+      ng-model="main.model().currentLanguage"
+      ng-change="main.l10n().changeLanguage(main.model().currentLanguage)"
+      ng-options="language.code as language.name for language in main.l10n().getSupportedLanguages()"></select>
+
+</div>
+</div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+
+<script src="js/gameinvite.v1.min.js"></script>
+</body>
+</html>

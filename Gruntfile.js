@@ -40,7 +40,7 @@ module.exports = function(grunt) {
           cache: [
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js',
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js',
-            'js/everything.min.js',
+            '',
             'css/app.min.css',
           ],
           network: ['*'],

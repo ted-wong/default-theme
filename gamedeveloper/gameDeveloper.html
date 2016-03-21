@@ -10,16 +10,13 @@
   <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
   <link rel="stylesheet" href="css/gameDeveloper.min.css"/>
 
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+  <script crossorigin="anonymous" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
 
-  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js"></script>
+  <script crossorigin="anonymous" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js"></script>
 
-  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+  <link crossorigin="anonymous" rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
-  <script src="js/everything.min.js"></script>
-
-  <!-- only for game developer! (we decode minified stack traces) -->
-  <script src="js/gameDeveloper.min.js"></script>
+  <script crossorigin="anonymous" src="http://www.multiplayer-gaming.com/api/loader.min.js?gamedeveloper=v200"></script>
 
 <script type="text/ng-template" id="html-templates/mainPage.html">
 Empty on purpose: to prevent errors because the router redirects unknown pages to /main:
@@ -324,10 +321,19 @@ otherwise({redirectTo: '/main'});
     Then you can modify your fork, run grunt, and push to github.
     <br>
     <label>
-      Enter your github.io URL here:<br>
-      <input size="80" type="url" class="form-control" ng-model="developerGame.game.themeBaseUrl" placeholder="http://yoav-zibin.github.io/default-theme/">
+      Enter your github.io URL here (the URL must match <code>http://SOMETHING/</code>):<br>
+      <input size="80" type="url" class="form-control" ng-model="developerGame.game.themeBaseUrl" pattern="^http[:][/][/].+[/]$" placeholder="http://yoav-zibin.github.io/default-theme/">
       <br>
     </label>
+    <div ng-if="developerGame.game.themeBaseUrl">
+    Test your 
+      <a href="{{developerGame.game.themeBaseUrl}}app/index.html" target="_blank">app</a>
+      and
+      <a href="{{developerGame.game.themeBaseUrl}}gameinvite/index.html" target="_blank">gameinvite</a>
+      (and
+      <a href="{{developerGame.game.themeBaseUrl}}gamedeveloper/gameDeveloper.html" target="_blank">gamedeveloper</a>
+      ).
+      </div>
   </div>
   
   <h4>[Optional] Localized text used in push notifications</h4>

@@ -725,6 +725,7 @@ var e2eTests;
     }
     function waitForElement(elem) {
         var elemName = getElementName(elem);
+        willDoLog("waitForElement " + elemName);
         // Wait until it becomes displayed. It might not be displayed right now
         // because it takes some time to pass messages via postMessage between game and platform.
         var promise = protractor.until.elementIsVisible(elem);

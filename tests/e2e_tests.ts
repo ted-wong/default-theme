@@ -654,6 +654,7 @@ function allElementsByNgIf(ifExpression: string) {
 
 function waitForElement(elem: protractor.ElementFinder) {
   let elemName = getElementName(elem);
+  willDoLog("waitForElement " + elemName);
   // Wait until it becomes displayed. It might not be displayed right now
   // because it takes some time to pass messages via postMessage between game and platform.
   let promise = protractor.until.elementIsVisible(elem);

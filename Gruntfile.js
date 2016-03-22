@@ -80,11 +80,13 @@ module.exports = function(grunt) {
 
   require('load-grunt-tasks')(grunt);
 
-  // Default task(s).
   grunt.registerTask('default', [
       'ts',
       'postcss',
       'manifest',
       'http-server', 'protractor']);
+  grunt.registerTask('skipProtractor', ['ts',
+      'postcss',
+      'manifest']);
 
 };

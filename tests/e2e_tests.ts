@@ -792,7 +792,7 @@ describe('App ', function() {
     checkPostTestInvariant();
     clearInterval(checkNoErrorInLogsIntervalId);
   });
-
+  
   function checkNoErrorInLogs() {
     expectEmptyBrowserLogs(browser);
     expectEmptyBrowserLogs(secondBrowser);
@@ -801,18 +801,16 @@ describe('App ', function() {
   function checkInvariantsInCurrBrowser(isPostTest: boolean) {
     expectEmptyBrowserLogs(currBrowser);
     let b = currBrowser;
-    b.ignoreSynchronization = true; // a hack to avoid an error at the beginning when no page is loaded.
-    currBrowser.getCurrentUrl().then((currentUrl)=>{
-      b.ignoreSynchronization = false;
-      if (currentUrl === "data:," || currentUrl.indexOf('gameinvite/') !== -1 || currentUrl.indexOf('gamedeveloper/') !== -1) return; // no invariants for gameinvite/gamedeveloper (only for app).
-      willDoLog("Start checkInvariantsInCurrBrowser");
+    let project = getProject(b);
+    if (project === 'app') {
+      willDoLog("Start checkInvariantsInCurrBrowser for app");
       // All tests must go back to main page, and cleanup after themselves,
       // i.e., have no matches and no open notifications.
       mainPage.expectVisible(); 
       if (isPostTest) mainPage.expectNoMatches(); // Ok to have matches before loadApp()
       notifications.expectNoNotifications();
       willDoLog("End checkInvariantsInCurrBrowser");
-    });
+    }
   }
   function checkInvariantsInAllBrowsers(isPostTest: boolean) {
     checkInvariantsInCurrBrowser(isPostTest);
@@ -876,8 +874,30 @@ describe('App ', function() {
     }
   }
 
+  // We have 3 projects: app, gameinvite, gamedeveloper.
+  interface StringIndexer {
+    [name: string]: string;
+  }
+  let browserNameToProject: StringIndexer = {};
+  function getProject(b: protractor.Protractor) {
+    return browserNameToProject[getBrowserName(b)];
+  }
   function getPage(url: string) {
-    willDoLog("Loading " + url + " in " + getBrowserName(currBrowser));
+    let browserName = getBrowserName(currBrowser);
+    willDoLog("Loading " + url + " in " + browserName);
+    if (url.substr(0, 1) !== '/') {
+      throw new Error("Url must start with /, but url=" + url);
+    }
+    let withoutInitialSlash = url.substr(1);
+    let project = withoutInitialSlash.substr(0, withoutInitialSlash.indexOf('/'));
+    if (project !== 'app' && project !== 'gameinvite' && project !== 'gamedeveloper') {
+      throw new Error("Url for an unknown project: project=" + project + " url=" + url);
+    }
+    let previousProject = browserNameToProject[browserName];
+    if (previousProject) {
+      checkPreLoadAppInvariantInCurrBrowser();
+    }
+    browserNameToProject[browserName] = project;
     currBrowser.get(url);
   }
 
@@ -1022,7 +1042,6 @@ describe('App ', function() {
   }
 
   function loadApp() {
-    checkPreLoadAppInvariantInCurrBrowser();
     // ChannelApi keeps an HTTP connection open, which causes protractor to fail after 10 seconds with:
     // Error Timed out waiting for Protractor to synchronize with the page
     // So we turn off channel API (isProtractor=true does that).

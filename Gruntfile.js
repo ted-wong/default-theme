@@ -40,7 +40,7 @@ module.exports = function(grunt) {
           cache: [
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js',
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js',
-            '',
+            'http://www.multiplayer-gaming.com/api/loader.min.js?app=v200',
             'css/app.min.css',
           ],
           network: ['*'],
@@ -84,6 +84,8 @@ module.exports = function(grunt) {
       'ts',
       'postcss',
       'manifest',
+      'http-server', 'protractor']);
+  grunt.registerTask('e2e', ['ts',
       'http-server', 'protractor']);
   grunt.registerTask('skipProtractor', ['ts',
       'postcss',

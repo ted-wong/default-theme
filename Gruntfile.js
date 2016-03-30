@@ -42,6 +42,7 @@ module.exports = function(grunt) {
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js',
             'http://www.multiplayer-gaming.com/api/loader.min.js?app=v200',
             'css/app.min.css',
+            'imgs/animatedEllipse.gif',
           ],
           network: ['*'],
           timestamp: true

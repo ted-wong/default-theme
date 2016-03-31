@@ -235,7 +235,7 @@
 
   <div ng-show="main.showGameIframe()"
     ng-class="main.shouldShowTopBar() ? 'opened_game_header' : 'closed_game_header'"
-    class="game_container"
+    class="game_container overflow-y-hidden-on-play-page"
     ng-bind-html="main.game().getIframeHtml()"></div>
 
   <!-- Starting a new match Modal -->

@@ -725,15 +725,15 @@ var e2eTests;
     }
     function waitForElement(elem) {
         var elemName = getElementName(elem);
-        willDoLog("waitForElement " + elemName);
+        willDoLog("waitForElement " + elemName + " in " + getBrowserName(currBrowser));
         // Wait until it becomes displayed. It might not be displayed right now
         // because it takes some time to pass messages via postMessage between game and platform.
-        var promise = protractor.until.elementIsVisible(elem);
-        currBrowser.driver.wait(promise, 10000).then(function () {
+        //let promise = protractor.until.elementIsVisible(elem);
+        currBrowser.driver.wait(function () { return elem.isDisplayed(); }, 10000).then(function () {
             // success
         }, function () {
             // failure
-            error("Failed waitForElement: " + elemName);
+            error("Failed waitForElement: " + elemName + " args=" + JSON.stringify(arguments));
         });
         expectToBe(elem.isDisplayed(), true);
     }
@@ -899,8 +899,8 @@ var e2eTests;
             b.manage().logs().get('browser').then(function (browserLog) {
                 // See if there are any errors (warnings are ok)
                 var hasErrors = false;
-                for (var _i = 0; _i < browserLog.length; _i++) {
-                    var log_1 = browserLog[_i];
+                for (var _i = 0, browserLog_1 = browserLog; _i < browserLog_1.length; _i++) {
+                    var log_1 = browserLog_1[_i];
                     var level = log_1.level.name;
                     if (level === 'INFO' || level === 'WARNING')
                         continue; // (warnings are ok)
@@ -1246,6 +1246,15 @@ var e2eTests;
                 tictactoe.expectEmptyBoard();
             });
             playPage.openExtraMatchOptions().gotoMain();
+        });
+        it('from darrenlevy@: can go to passAndPlay, make move, go to Invite Friends and go back to main menu', function () {
+            mainPage.openNewMatchModal().startPassAndPlay();
+            tictactoe.run(function () {
+                tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+            });
+            playPage.openExtraMatchOptions().openNewMatchModal().gotoInviteFriends();
+            friendsInvitePage.gotoMain();
+            mainPage.expectVisible();
         });
         it('can invite using userName', function () {
             runInSecondBrowser(function () {

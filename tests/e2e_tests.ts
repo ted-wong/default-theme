@@ -654,16 +654,15 @@ function allElementsByNgIf(ifExpression: string) {
 
 function waitForElement(elem: protractor.ElementFinder) {
   let elemName = getElementName(elem);
-  willDoLog("waitForElement " + elemName);
+  willDoLog("waitForElement " + elemName + " in " + getBrowserName(currBrowser));
   // Wait until it becomes displayed. It might not be displayed right now
   // because it takes some time to pass messages via postMessage between game and platform.
-  let promise = protractor.until.elementIsVisible(elem);
-  currBrowser.driver.wait(promise, 10000).then(
+  currBrowser.driver.wait(()=>elem.isDisplayed(), 10000).then(
     ()=>{
       // success
-    }, ()=>{
+    }, function () {
       // failure
-      error("Failed waitForElement: " + elemName);
+      error("Failed waitForElement: " + elemName + " args=" + JSON.stringify(arguments));
     });
   expectToBe(elem.isDisplayed(), true);
 }
@@ -1217,6 +1216,16 @@ describe('App ', function() {
       tictactoe.expectEmptyBoard();
     });
     playPage.openExtraMatchOptions().gotoMain();
+  });
+  
+  it('from darrenlevy@: can go to passAndPlay, make move, go to Invite Friends and go back to main menu', ()=>{
+    mainPage.openNewMatchModal().startPassAndPlay();
+    tictactoe.run(()=>{
+      tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+    });
+    playPage.openExtraMatchOptions().openNewMatchModal().gotoInviteFriends();
+    friendsInvitePage.gotoMain();
+    mainPage.expectVisible();
   });
   
   it('can invite using userName', ()=>{

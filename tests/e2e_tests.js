@@ -728,7 +728,6 @@ var e2eTests;
         willDoLog("waitForElement " + elemName + " in " + getBrowserName(currBrowser));
         // Wait until it becomes displayed. It might not be displayed right now
         // because it takes some time to pass messages via postMessage between game and platform.
-        //let promise = protractor.until.elementIsVisible(elem);
         currBrowser.driver.wait(function () { return elem.isDisplayed(); }, 10000).then(function () {
             // success
         }, function () {
@@ -899,8 +898,8 @@ var e2eTests;
             b.manage().logs().get('browser').then(function (browserLog) {
                 // See if there are any errors (warnings are ok)
                 var hasErrors = false;
-                for (var _i = 0, browserLog_1 = browserLog; _i < browserLog_1.length; _i++) {
-                    var log_1 = browserLog_1[_i];
+                for (var _i = 0; _i < browserLog.length; _i++) {
+                    var log_1 = browserLog[_i];
                     var level = log_1.level.name;
                     if (level === 'INFO' || level === 'WARNING')
                         continue; // (warnings are ok)

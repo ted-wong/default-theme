@@ -674,7 +674,7 @@ function getElementName(elem: protractor.ElementFinder) {
 let startedExecutionTime = new Date().getTime();
 function log(msg: string) {
   let now = new Date().getTime();
-  //console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
+  //TODO: console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
 }
 function error(msg: string) {
   log(msg);

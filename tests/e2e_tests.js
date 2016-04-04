@@ -742,7 +742,7 @@ var e2eTests;
     var startedExecutionTime = new Date().getTime();
     function log(msg) {
         var now = new Date().getTime();
-        //console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
+        //TODO: console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
     }
     function error(msg) {
         log(msg);

@@ -742,7 +742,7 @@ var e2eTests;
     var startedExecutionTime = new Date().getTime();
     function log(msg) {
         var now = new Date().getTime();
-        //TODO: console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
+        console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
     }
     function error(msg) {
         log(msg);
@@ -833,16 +833,15 @@ var e2eTests;
             check(name.length <= 30);
             return name;
         }
-        var checkNoErrorInLogsIntervalId = null;
         beforeEach(function () {
             log('\n\n\nRunning test: ' + lastTest.fullName);
             loadApp();
             notifications.expectNoNotifications();
-            checkNoErrorInLogsIntervalId = setInterval(checkNoErrorInLogs, 100);
+            checkNoErrorInLogs();
         });
         afterEach(function () {
             checkPostTestInvariant();
-            clearInterval(checkNoErrorInLogsIntervalId);
+            checkNoErrorInLogs();
         });
         function checkNoErrorInLogs() {
             expectEmptyBrowserLogs(browser);
@@ -1255,9 +1254,8 @@ var e2eTests;
             friendsInvitePage.gotoMain();
             mainPage.expectVisible();
         });
-        it('from Prasoon Goyal & Rachita Hajela: can go to practice, share printscreen, open game invite in 2nd browser, back to main menu', function () {
+        it('from Prasoon Goyal & Rachita Hajela: can go to practice, open game invite in 2nd browser, back to main menu', function () {
             mainPage.openNewMatchModal().startPractice();
-            playPage.openExtraMatchOptions().sharePrintscreen();
             runInSecondBrowser(function () {
                 getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');
                 var interpolationParams = { GAME_NAME: "test-tictactoe", PLAYER_NAME: browser1NameStr };

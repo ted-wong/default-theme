@@ -674,7 +674,7 @@ function getElementName(elem: protractor.ElementFinder) {
 let startedExecutionTime = new Date().getTime();
 function log(msg: string) {
   let now = new Date().getTime();
-  //TODO: console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
+  console.log("After " + (now - startedExecutionTime) + " milliseconds: " + msg);
 }
 function error(msg: string) {
   log(msg);
@@ -780,16 +780,15 @@ describe('App ', function() {
     return name;
   }
   
-  let checkNoErrorInLogsIntervalId: number = null;
   beforeEach(()=>{
     log('\n\n\nRunning test: ' + lastTest.fullName);
     loadApp();
     notifications.expectNoNotifications();
-    checkNoErrorInLogsIntervalId = setInterval(checkNoErrorInLogs, 100);
+    checkNoErrorInLogs();
   });
   afterEach(()=>{
     checkPostTestInvariant();
-    clearInterval(checkNoErrorInLogsIntervalId);
+    checkNoErrorInLogs();
   });
   
   function checkNoErrorInLogs() {
@@ -1228,9 +1227,8 @@ describe('App ', function() {
     mainPage.expectVisible();
   });
   
-  it('from Prasoon Goyal & Rachita Hajela: can go to practice, share printscreen, open game invite in 2nd browser, back to main menu', ()=> {
+  it('from Prasoon Goyal & Rachita Hajela: can go to practice, open game invite in 2nd browser, back to main menu', ()=> {
     mainPage.openNewMatchModal().startPractice();
-    playPage.openExtraMatchOptions().sharePrintscreen(); 
     runInSecondBrowser(()=>{
       getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');
       let interpolationParams = {GAME_NAME: "test-tictactoe", PLAYER_NAME: browser1NameStr};
@@ -1244,24 +1242,24 @@ describe('App ', function() {
   });
   
   it('from DiegoRincon: can finish a practice TicTacToe match and go back to main menu', function () {
-      mainPage.openNewMatchModal().startPractice();
-      tictactoe.run(function () {
-          tictactoe.expectEmptyBoard();
-          tictactoe.clickDivAndExpectPiece(1, 0, "X");
-          // wait for AI to make at least one move
-          // For some reason waitForElement doesn't work, but elementsLocated does work. Weird...
-          currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x0')), 10000);
-          tictactoe.expectPiece(0, 0, 'O'); // AI played at position 0x0
-          tictactoe.clickDivAndExpectPiece(2, 0, "X");
-          currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x1')), 10000);
-          tictactoe.expectPiece(0, 1, 'O'); // AI played at position 0x0
-          tictactoe.clickDivAndExpectPiece(1, 1, "X");
-          currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x2')), 10000);
-          tictactoe.expectPiece(0, 2, 'O'); // AI played at position 0x0
-      });
-      expectDisplayed(id('game_over_match_status'));
-      gameOverModal.close();
-      playPage.openExtraMatchOptions().gotoMain();
+    mainPage.openNewMatchModal().startPractice();
+    tictactoe.run(function () {
+        tictactoe.expectEmptyBoard();
+        tictactoe.clickDivAndExpectPiece(1, 0, "X");
+        // wait for AI to make at least one move
+        // For some reason waitForElement doesn't work, but elementsLocated does work. Weird...
+        currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x0')), 10000);
+        tictactoe.expectPiece(0, 0, 'O'); // AI played at position 0x0
+        tictactoe.clickDivAndExpectPiece(2, 0, "X");
+        currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x1')), 10000);
+        tictactoe.expectPiece(0, 1, 'O'); // AI played at position 0x0
+        tictactoe.clickDivAndExpectPiece(1, 1, "X");
+        currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x2')), 10000);
+        tictactoe.expectPiece(0, 2, 'O'); // AI played at position 0x0
+    });
+    expectDisplayed(id('game_over_match_status'));
+    gameOverModal.close();
+    playPage.openExtraMatchOptions().gotoMain();
   });
 
   it('from ismailmustafa and pdhar (team Carrom)@: can finish a passAndPlay match, go to the main menu, finish a practice match, and go back to main menu', ()=>{

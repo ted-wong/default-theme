@@ -1308,6 +1308,83 @@ describe('App ', function() {
     playPage.openExtraMatchOptions().gotoMain();
   });
   
+  it('from pioneers team (Hung-Ting Wen): single-player game ends in win/lose', ()=> {
+    mainPage.openNewMatchModal().startPassAndPlay();
+    tictactoe.run(()=>{
+      /**
+       * First test case: X won
+       */
+      tictactoe.expectEmptyBoard();
+      tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+      tictactoe.clickDivAndExpectPiece(1, 2, 'O');
+      tictactoe.clickDivAndExpectPiece(1, 1, 'X');
+      tictactoe.clickDivAndExpectPiece(2, 1, 'O');
+
+      //Winning move
+      tictactoe.clickDivAndExpectPiece(2, 2, 'X');
+      tictactoe.expectBoard(
+          [['X', '', ''],
+           ['', 'X', 'O'],
+           ['', 'O', 'X']]);
+    });
+    expectDisplayed(id('game_over_match_status'));
+    l10n.expectTranslate(gameOverModal.getMatchOverStatus(), 'MATCH_STATUS_OPPONENT_WON_WITH_NAME', {OPPONENT_NAME: 'PLAYER_X'});
+    
+    gameOverModal.close();
+    tictactoe.run(()=>{
+      /**
+       * Second test case: O won
+       */
+      tictactoe.expectEmptyBoard();
+      tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+      tictactoe.clickDivAndExpectPiece(1, 1, 'O');
+      tictactoe.clickDivAndExpectPiece(1, 2, 'X');
+      tictactoe.clickDivAndExpectPiece(0, 2, 'O');
+      tictactoe.clickDivAndExpectPiece(2, 1, 'X');
+      //Winning move
+      tictactoe.clickDivAndExpectPiece(2, 0, 'O');
+      tictactoe.expectBoard(
+          [['X', '', 'O'],
+           ['', 'O', 'X'],
+           ['O', 'X', '']]);
+    });
+    expectDisplayed(id('game_over_match_status'));
+    l10n.expectTranslate(gameOverModal.getMatchOverStatus(), 'MATCH_STATUS_OPPONENT_WON_WITH_NAME', {OPPONENT_NAME: 'PLAYER_O'});
+    
+    //Cleanup
+    gameOverModal.close();
+    playPage.openExtraMatchOptions().gotoMain();
+  });
+  
+  it('from pioneers team (Hung-Ting Wen): single player game ends in a tie', ()=> {
+    mainPage.openNewMatchModal().startPassAndPlay();
+    tictactoe.run(()=>{
+      /**
+       * Third test case: tie
+       */
+      tictactoe.expectEmptyBoard();
+      for (let col = 0; col < 2; col++) {
+        tictactoe.clickDivAndExpectPiece(0, col, 'X');
+        tictactoe.clickDivAndExpectPiece(1, col, 'O');
+      }
+
+      tictactoe.clickDivAndExpectPiece(1, 2, 'X');
+      tictactoe.clickDivAndExpectPiece(0, 2, 'O');
+      tictactoe.clickDivAndExpectPiece(2, 0, 'X');
+      tictactoe.clickDivAndExpectPiece(2, 2, 'O');
+      tictactoe.clickDivAndExpectPiece(2, 1, 'X');
+      tictactoe.expectBoard(
+          [['X', 'X', 'O'],
+           ['O', 'O', 'X'],
+           ['X', 'X', 'O']]);
+    });
+    expectDisplayed(id('game_over_match_status'));
+    l10n.expectTranslate(gameOverModal.getMatchOverStatus(), 'MATCH_STATUS_ENDED_IN_TIE', {});
+    //Cleanup
+    gameOverModal.close();
+    playPage.openExtraMatchOptions().gotoMain();
+  });
+  
   it('can invite using userName', ()=>{
     runInSecondBrowser(()=>{
       getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');

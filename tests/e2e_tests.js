@@ -1369,8 +1369,7 @@ var e2eTests;
             gameOverModal.close();
             playPage.openExtraMatchOptions().gotoMain();
         });
-        fit('from pioneers team (Hung-Ting Wen): single player game ends in a tie', function () {
-            oneTimeInitInBothBrowsers();
+        it('from pioneers team (Hung-Ting Wen): single player game ends in a tie', function () {
             mainPage.openNewMatchModal().startPassAndPlay();
             tictactoe.run(function () {
                 /**

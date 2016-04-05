@@ -333,6 +333,18 @@ var e2eTests;
             expectToBe(notifications.getNotificationsCount(), 0);
         }
         notifications.expectNoNotifications = expectNoNotifications;
+        function expectMaybeGameinviteNotification() {
+            // There might be a gameinvite notification from some failed previous tests,
+            // if so, just close it.
+            getNotificationsCount().then(function (count) {
+                expect(count == 0 || count == 1).toBeTruthy();
+                if (count == 1) {
+                    expectGameInvite();
+                    closeNotificationWithIndex(0);
+                }
+            });
+        }
+        notifications.expectMaybeGameinviteNotification = expectMaybeGameinviteNotification;
         function getTitle(notificationIndex) {
             return allElementsByNgIf('notification.title()').get(notificationIndex).getText();
         }
@@ -836,7 +848,7 @@ var e2eTests;
         beforeEach(function () {
             log('\n\n\nRunning test: ' + lastTest.fullName);
             loadApp();
-            notifications.expectNoNotifications();
+            notifications.expectMaybeGameinviteNotification();
             checkNoErrorInLogs();
         });
         afterEach(function () {
@@ -1093,18 +1105,10 @@ var e2eTests;
             myInfoModal.cancel();
             runInSecondBrowser(function () {
                 loadApp();
-                notifications.expectNoNotifications();
+                notifications.expectMaybeGameinviteNotification();
                 myInfoModal.cancel();
             });
-            // There might be a gameinvite notification from some failed previous tests,
-            // if so, just close it.
-            notifications.getNotificationsCount().then(function (count) {
-                expect(count == 0 || count == 1).toBeTruthy();
-                if (count == 1) {
-                    notifications.expectGameInvite();
-                    notifications.closeNotificationWithIndex(0);
-                }
-            });
+            notifications.expectMaybeGameinviteNotification();
             changeDisplayAndUserName(browser1NameStr);
             runInSecondBrowser(function () {
                 changeDisplayAndUserName(browser2NameStr);

@@ -295,6 +295,17 @@ module notifications {
   export function expectNoNotifications() {
     expectToBe(notifications.getNotificationsCount(), 0);
   }
+  export function expectMaybeGameinviteNotification() {
+    // There might be a gameinvite notification from some failed previous tests,
+    // if so, just close it.
+    getNotificationsCount().then((count) => {
+      expect(count == 0 || count == 1).toBeTruthy();
+      if (count == 1) {
+        expectGameInvite();
+        closeNotificationWithIndex(0);
+      }
+    });
+  }
   
   export function getTitle(notificationIndex: number) {
     return allElementsByNgIf('notification.title()').get(notificationIndex).getText();
@@ -783,7 +794,7 @@ describe('App ', function() {
   beforeEach(()=>{
     log('\n\n\nRunning test: ' + lastTest.fullName);
     loadApp();
-    notifications.expectNoNotifications();
+    notifications.expectMaybeGameinviteNotification();
     checkNoErrorInLogs();
   });
   afterEach(()=>{
@@ -1051,19 +1062,11 @@ describe('App ', function() {
     myInfoModal.cancel();
     runInSecondBrowser(()=>{
       loadApp();
-      notifications.expectNoNotifications();
+      notifications.expectMaybeGameinviteNotification();
       myInfoModal.cancel();
     });
     
-    // There might be a gameinvite notification from some failed previous tests,
-    // if so, just close it.
-    notifications.getNotificationsCount().then((count) => {
-      expect(count == 0 || count == 1).toBeTruthy();
-      if (count == 1) {
-        notifications.expectGameInvite();
-        notifications.closeNotificationWithIndex(0);
-      }
-    });
+    notifications.expectMaybeGameinviteNotification();
     changeDisplayAndUserName(browser1NameStr);
     runInSecondBrowser(()=>{
       changeDisplayAndUserName(browser2NameStr);

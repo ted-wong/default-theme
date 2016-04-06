@@ -252,7 +252,8 @@
         <div id="test_goto_invite_friends" class="menu-item" ng-click="main.changePage('/inviteFriends')">
           <div class="text">{{ 'MAIN_INVITE_FRIENDS_TITLE' | translate }}</div>
         </div>
-        <div id="test_share_invite_link_no_printscreen" class="menu-item" ng-click="main.shareInviteLink({takePrintscreen: false})">
+        <!-- I set image&message&subject to false because otherwise sharing via FB fails on Android. -->
+        <div id="test_share_invite_link_no_printscreen" class="menu-item" ng-click="main.shareInviteLink({takePrintscreen: false, link: true, image: false, message: false, subject: false})">
           <div class="text">{{ 'MAIN_SHARE_INVITE_LINK_TITLE' | translate }}</div>
         </div>
         <div id="test_start_practice" class="menu-item" ng-click="main.newSinglePlayer('practice')" ng-if="!main.game().isHidePracticeOption()">

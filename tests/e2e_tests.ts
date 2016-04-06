@@ -324,8 +324,9 @@ module notifications {
   export function expectTooManyMatches_DismissEndedMatches() {
     expectOneNotificationWithMessageId("IN_APP_NOTIFICATION_TOO_MANY_MATCHES_DISMISS_ENDED_MATCHES");
   }
-  export function expectYouWereBlocked() {
-    expectOneNotificationWithMessageId("IN_APP_NOTIFICATION_YOU_WERE_BLOCKED");
+  export function expectYouWereBlockedInNotificationIndex(notificationIndex: number) {
+    waitForElement(allElementsByNgClick('notification.onClose()').get(notificationIndex));
+    l10n.expectTranslate(getMessage(notificationIndex), "IN_APP_NOTIFICATION_YOU_WERE_BLOCKED");
   }
   export function expectOneNotificationWithMessageId(messageId: string) {
     expectOneNotification("", messageId);
@@ -420,6 +421,19 @@ module playerInfoModal {
   }
   
   // to-do: add chat, invite to new match
+  export function getNewGame() {
+      return id('player_info_invite_to_match');
+  }
+  export function inviteToNewGame() {
+      click(getNewGame());
+  }
+  
+  export function getPlayerBlocked() {
+      return id('player_info_toggle_blocking');
+  }
+  export function blockPlayer() {
+      click(getPlayerBlocked());
+  }  
   
   export function getClose() {
     return id('close_player_info');
@@ -1387,6 +1401,34 @@ describe('App ', function() {
     gameOverModal.close();
     playPage.openExtraMatchOptions().gotoMain();
   });
+  
+  it('from Shuang Wang (Enclosed Combat team): can start a match from gameinvite, player1 blocks player2, and player2 receives block message when invite player1 to a new game', ()=>{
+    getPage('/gameinvite/?' + browser2NameStr + '=testtictactoe');
+    loadApp();
+    notifications.clickNotificationWithIndex(0);
+    playPage.openInfoModalForPlayerIndex(1);
+    playerInfoModal.blockPlayer();
+    playerInfoModal.close();
+    playPage.openExtraMatchOptions().dismissMatch();
+    runInSecondBrowser(()=>{
+      getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');
+      loadApp();
+      notifications.clickNotificationWithIndex(0);
+      playPage.openInfoModalForPlayerIndex(1);
+      playerInfoModal.inviteToNewGame();
+      tictactoe.run(()=>{
+        tictactoe.expectEmptyBoard();
+        tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+      });
+      notifications.expectYouWereBlockedInNotificationIndex(1);
+      expect(notifications.getNotificationsCount()).toBe(2);
+      notifications.closeNotificationWithIndex(1);
+      notifications.closeNotificationWithIndex(0);
+      playPage.openExtraMatchOptions().dismissMatch();
+      mainPage.clickMatchIndex(0);
+      playPage.openExtraMatchOptions().dismissMatch();
+    });
+  }); 
   
   it('can invite using userName', ()=>{
     runInSecondBrowser(()=>{

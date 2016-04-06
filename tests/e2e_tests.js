@@ -366,10 +366,11 @@ var e2eTests;
             expectOneNotificationWithMessageId("IN_APP_NOTIFICATION_TOO_MANY_MATCHES_DISMISS_ENDED_MATCHES");
         }
         notifications.expectTooManyMatches_DismissEndedMatches = expectTooManyMatches_DismissEndedMatches;
-        function expectYouWereBlocked() {
-            expectOneNotificationWithMessageId("IN_APP_NOTIFICATION_YOU_WERE_BLOCKED");
+        function expectYouWereBlockedInNotificationIndex(notificationIndex) {
+            waitForElement(allElementsByNgClick('notification.onClose()').get(notificationIndex));
+            l10n.expectTranslate(getMessage(notificationIndex), "IN_APP_NOTIFICATION_YOU_WERE_BLOCKED");
         }
-        notifications.expectYouWereBlocked = expectYouWereBlocked;
+        notifications.expectYouWereBlockedInNotificationIndex = expectYouWereBlockedInNotificationIndex;
         function expectOneNotificationWithMessageId(messageId) {
             expectOneNotification("", messageId);
         }
@@ -474,6 +475,22 @@ var e2eTests;
         }
         playerInfoModal.getDisplayName = getDisplayName;
         // to-do: add chat, invite to new match
+        function getNewGame() {
+            return id('player_info_invite_to_match');
+        }
+        playerInfoModal.getNewGame = getNewGame;
+        function inviteToNewGame() {
+            click(getNewGame());
+        }
+        playerInfoModal.inviteToNewGame = inviteToNewGame;
+        function getPlayerBlocked() {
+            return id('player_info_toggle_blocking');
+        }
+        playerInfoModal.getPlayerBlocked = getPlayerBlocked;
+        function blockPlayer() {
+            click(getPlayerBlocked());
+        }
+        playerInfoModal.blockPlayer = blockPlayer;
         function getClose() {
             return id('close_player_info');
         }
@@ -1398,6 +1415,34 @@ var e2eTests;
             //Cleanup
             gameOverModal.close();
             playPage.openExtraMatchOptions().gotoMain();
+        });
+        fit('from Shuang Wang (Enclosed Combat team): can start a match from gameinvite, player1 blocks player2, and player2 receives block message when invite player1 to a new game', function () {
+            oneTimeInitInBothBrowsers();
+            getPage('/gameinvite/?' + browser2NameStr + '=testtictactoe');
+            loadApp();
+            notifications.clickNotificationWithIndex(0);
+            playPage.openInfoModalForPlayerIndex(1);
+            playerInfoModal.blockPlayer();
+            playerInfoModal.close();
+            playPage.openExtraMatchOptions().dismissMatch();
+            runInSecondBrowser(function () {
+                getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');
+                loadApp();
+                notifications.clickNotificationWithIndex(0);
+                playPage.openInfoModalForPlayerIndex(1);
+                playerInfoModal.inviteToNewGame();
+                tictactoe.run(function () {
+                    tictactoe.expectEmptyBoard();
+                    tictactoe.clickDivAndExpectPiece(0, 0, 'X');
+                });
+                notifications.expectYouWereBlockedInNotificationIndex(1);
+                expect(notifications.getNotificationsCount()).toBe(2);
+                notifications.closeNotificationWithIndex(1);
+                notifications.closeNotificationWithIndex(0);
+                playPage.openExtraMatchOptions().dismissMatch();
+                mainPage.clickMatchIndex(0);
+                playPage.openExtraMatchOptions().dismissMatch();
+            });
         });
         it('can invite using userName', function () {
             runInSecondBrowser(function () {

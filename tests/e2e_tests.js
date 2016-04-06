@@ -1416,8 +1416,7 @@ var e2eTests;
             gameOverModal.close();
             playPage.openExtraMatchOptions().gotoMain();
         });
-        fit('from Shuang Wang (Enclosed Combat team): can start a match from gameinvite, player1 blocks player2, and player2 receives block message when invite player1 to a new game', function () {
-            oneTimeInitInBothBrowsers();
+        it('from Shuang Wang (Enclosed Combat team): can start a match from gameinvite, player1 blocks player2, and player2 receives block message when invite player1 to a new game', function () {
             getPage('/gameinvite/?' + browser2NameStr + '=testtictactoe');
             loadApp();
             notifications.clickNotificationWithIndex(0);

@@ -149,16 +149,11 @@
             ng-click="main.closeGameOverModal(); main.shareInviteLink({takePrintscreen: true, translationIdPrefix: 'SHARE_INTENT_WON_GAME'})">
           {{ 'SHARE_INTENT_WON_GAME_TAKE_SCREENSHOT' | translate }}
         </button>
-        <div id="test_game_over_dismiss_and_rematch" class="menu-item" ng-click="main.currentMatch().dismissAndRematch()"
+        <div id="test_game_over_rematch" class="menu-item" ng-click="main.currentMatch().startNewMatch()"
             ng-if="main.currentMatch().canRematch()">
           <div class="text">
             {{ main.translateRematch() }}
-            <div class="smallertext">{{ 'MATCH_ALSO_DELETE' | translate }}</div>
           </div>
-        </div>
-        <div id="test_game_over_dismiss_match" class="menu-item" ng-click="main.currentMatch().dismissAndLoadNextMatchOrMainPage();"
-            ng-if="!main.currentMatch().isSinglePlayer()">
-          <div class="text">{{ 'MATCH_DELETE' | translate }}</div>
         </div>
         <button id="test_close_game_over_modal" type="button" class="btn" ng-click="main.closeGameOverModal()">
           {{ 'MODAL_BUTTON_CLOSE' | translate }}

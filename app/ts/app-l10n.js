@@ -301,16 +301,6 @@
             "hi": "",
             "es": "Compartir un link de invitacion con tus amigos."
         },
-        "MATCH_ALSO_DELETE": {
-            "en": "Also delete game",
-            "iw": "גם מחק את המשחק",
-            "pt": "",
-            "zh": "并且删除当前游戏",
-            "el": "",
-            "fr": "",
-            "hi": "",
-            "es": "Tambien borrar juego"
-        },
         "MATCH_DELETE": {
             "en": "Delete game",
             "iw": "מחק את המשחק",

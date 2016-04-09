@@ -205,13 +205,6 @@ module gameOverModal {
     click(getDismissAndRematch());
   }
   
-  export function getDismiss() {
-    return id('game_over_dismiss_match');
-  }
-  export function dismiss() {
-    click(getDismiss());
-  }
-  
   export function getClose() {
     return id('close_game_over_modal');
   }
@@ -1053,7 +1046,8 @@ describe('App ', function() {
       mainPage.clickMatchIndex(0);
       // Will show gameOverModal
       gameOverModal.expectVisible();
-      gameOverModal.dismiss();
+      gameOverModal.close();
+      playPage.openExtraMatchOptions().dismissMatch();
       mainPage.expectNoMatches();
     });
   }

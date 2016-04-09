@@ -230,14 +230,6 @@ var e2eTests;
             click(getDismissAndRematch());
         }
         gameOverModal.dismissAndRematch = dismissAndRematch;
-        function getDismiss() {
-            return id('game_over_dismiss_match');
-        }
-        gameOverModal.getDismiss = getDismiss;
-        function dismiss() {
-            click(getDismiss());
-        }
-        gameOverModal.dismiss = dismiss;
         function getClose() {
             return id('close_game_over_modal');
         }
@@ -1102,7 +1094,8 @@ var e2eTests;
                 mainPage.clickMatchIndex(0);
                 // Will show gameOverModal
                 gameOverModal.expectVisible();
-                gameOverModal.dismiss();
+                gameOverModal.close();
+                playPage.openExtraMatchOptions().dismissMatch();
                 mainPage.expectNoMatches();
             });
         }

@@ -38,8 +38,8 @@ module.exports = function(grunt) {
         options: {
           basePath: '.',
           cache: [
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-route.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.min.js',
             'http://www.multiplayer-gaming.com/api/loader.min.js?app=v200',
             'css/app.min.css',
             'imgs/animatedEllipse.gif',

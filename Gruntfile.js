@@ -2,6 +2,10 @@ module.exports = function(grunt) {
   var apiVersion = "v201";
   
   function getManifestParameters(isForTesting) {
+    // In production, the manifest must have "NETWORK: *" (allow anything to be fetched)
+    // because, e.g., avatars are stored in many domains/URLs (facebook, etc).
+    // However, in testing, it's better not to have "NETWORK: *" so we can test our appcache
+    // (and make sure we didn't forget to include some JS/CSS/IMGs/etc).
     return {
         options: {
           basePath: '.',

@@ -68,6 +68,14 @@
 
 <script crossorigin="anonymous" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
 
-<script crossorigin="anonymous" src="http://www.multiplayer-gaming.com/api/loader.min.js?gameinvite=v200"></script>
+<script crossorigin="anonymous" src="http://www.multiplayer-gaming.com/api/loader.min.js?gameinvite=v201"></script>
+
+<script>
+function gamingPlatformInitFinished() {
+  angular.module('whateverNameApp', ["gamingPlatformModule"]);
+  angular.bootstrap(document, ["whateverNameApp"]);
+}
+</script>
+
 </body>
 </html>

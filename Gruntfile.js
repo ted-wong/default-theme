@@ -1,5 +1,32 @@
 module.exports = function(grunt) {
-
+  var apiVersion = "v201";
+  
+  function getManifestParameters(isForTesting) {
+    return {
+        options: {
+          basePath: '.',
+          cache: [
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.min.js',
+            'http://www.multiplayer-gaming.com/api/loader.min.js?app=v201',
+            'css/app.min.css',
+            'imgs/animatedEllipse.gif',
+          ],
+          network: !isForTesting ? ['*'] : 
+            ['http://www.multiplayer-gaming.com/api/app.' + apiVersion + '.min.js',
+             'js/everything.min.js'],
+          timestamp: true,
+          process: !isForTesting ? null : function(path) {
+            var r = path.substring('app/'.length);
+            console.log(r);
+            return r;
+          },
+        },
+        dest: 'app/index.appcache',
+        src: isForTesting ? ['app/imgs/*.*'] : [],
+      };
+  }
+  
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     ts: {
@@ -34,22 +61,8 @@ module.exports = function(grunt) {
       },
     },
     manifest: {
-      generate: {
-        options: {
-          basePath: '.',
-          cache: [
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.min.js',
-            'http://www.multiplayer-gaming.com/api/loader.min.js?app=v201',
-            'css/app.min.css',
-            'imgs/animatedEllipse.gif',
-          ],
-          network: ['*'],
-          timestamp: true
-        },
-        dest: 'app/index.appcache',
-        src: []
-      }
+      forTesting: getManifestParameters(true),
+      forProduction: getManifestParameters(false), 
     },
     'http-server': {
         'dev': {
@@ -84,12 +97,11 @@ module.exports = function(grunt) {
   grunt.registerTask('default', [
       'ts',
       'postcss',
-      'manifest',
-      'http-server', 'protractor']);
-  grunt.registerTask('e2e', ['ts',
-      'http-server', 'protractor']);
+      'manifest:forTesting',
+      'http-server', 'protractor',
+      'manifest:forProduction']);
   grunt.registerTask('skipProtractor', ['ts',
       'postcss',
-      'manifest']);
+      'manifest:forProduction']);
 
 };

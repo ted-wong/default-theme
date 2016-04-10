@@ -291,13 +291,13 @@ module notifications {
   export function expectMaybeGameinviteNotification() {
     // There might be a gameinvite notification from some failed previous tests,
     // if so, just close it.
-    getNotificationsCount().then((count) => {
+    getNotificationsCount().then(runInSameBrowser((count) => {
       expect(count == 0 || count == 1).toBeTruthy();
       if (count == 1) {
         expectGameInvite();
         closeNotificationWithIndex(0);
       }
-    });
+    }));
   }
   
   export function getTitle(notificationIndex: number) {
@@ -638,6 +638,34 @@ module JasmineOverrides {
 declare var require: (module: string) => any;
 
 // Common functions
+let currBrowser: protractor.Protractor = browser;
+let secondBrowser: protractor.Protractor = browser.forkNewDriverInstance();
+function getBrowserName(b: protractor.Protractor) {
+  return b === secondBrowser ? "browser2" : "browser1";
+}
+
+function setFirstBrowser() {
+  currBrowser = browser;
+}
+function runInSecondBrowser(fn: ()=>void) {
+  runInBrowser(secondBrowser, fn);
+}
+function runInBrowser(b: protractor.Protractor, fn: ()=>void) {
+  let oldBrowser = currBrowser;
+  currBrowser = b;
+  try {
+    fn();
+  } finally {
+    currBrowser = oldBrowser;
+  }
+}
+function runInSameBrowser<T>(fn: (t: T) => void) {
+  let b = currBrowser;
+  return (t: T) => {
+    runInBrowser(b, () => { fn(t); });
+  };
+}
+
 function check(value: boolean) {
   if (!value) throw new Error("Check failed");
 }
@@ -646,12 +674,6 @@ function regexEscape(text: string) {
 }
 function getStacktrace(): string {
   return (<any>new Error()).stack;
-}
-
-let currBrowser: protractor.Protractor = browser;
-let secondBrowser: protractor.Protractor = browser.forkNewDriverInstance();
-function getBrowserName(b: protractor.Protractor) {
-  return b === secondBrowser ? "browser2" : "browser1";
 }
 
 function element(locator: webdriver.Locator) {
@@ -798,10 +820,18 @@ describe('App ', function() {
     return name;
   }
   
+  function loadAppAndCloseMyInfoModalAndMaybeGameinviteNotification() {
+    loadApp();
+    // Before closing any notification (like gameinvite), we need to close my info modal
+    myInfoModal.getCancel().isPresent().then(runInSameBrowser((isMyInfoModalDisplayed) => {
+      if (isMyInfoModalDisplayed) myInfoModal.cancel();
+    }));
+    notifications.expectMaybeGameinviteNotification();
+  }
+  
   beforeEach(()=>{
     log('\n\n\nRunning test: ' + lastTest.fullName);
-    loadApp();
-    notifications.expectMaybeGameinviteNotification();
+    loadAppAndCloseMyInfoModalAndMaybeGameinviteNotification();
     checkNoErrorInLogs();
   });
   afterEach(()=>{
@@ -876,18 +906,6 @@ describe('App ', function() {
         error(getBrowserName(b) + " has a warning/error in the logs. Opens the developer console in the browsers and look at the logs.");
       }
     });
-  }
-
-  function setFirstBrowser() {
-    currBrowser = browser;
-  }
-  function runInSecondBrowser(fn: ()=>void) {
-    currBrowser = secondBrowser;
-    try {
-      fn();
-    } finally {
-      currBrowser = browser;
-    }
   }
 
   // We have 3 projects: app, gameinvite, gamedeveloper.
@@ -1062,19 +1080,15 @@ describe('App ', function() {
     // ChannelApi keeps an HTTP connection open, which causes protractor to fail after 10 seconds with:
     // Error Timed out waiting for Protractor to synchronize with the page
     // So we turn off channel API (isProtractor=true does that).
-    getPage('/app/?onlyGameId=' + GAME_ID + '&isProtractor=true&testBrowserName=' + getBrowserName(currBrowser));
+    getPage('/app/index.html?onlyGameId=' + GAME_ID + '&isProtractor=true&testBrowserName=' + getBrowserName(currBrowser));
   }
 
   function oneTimeInitInBothBrowsers() {
-    // The first time the app loads, we show "my user info modal".
-    myInfoModal.cancel();
+    // The first time the app loads, we show "my user info modal" (but in beforeEach I close myInfo modal to close possible gameinvite notification)
     runInSecondBrowser(()=>{
-      loadApp();
-      notifications.expectMaybeGameinviteNotification();
-      myInfoModal.cancel();
+      loadAppAndCloseMyInfoModalAndMaybeGameinviteNotification();
     });
     
-    notifications.expectMaybeGameinviteNotification();
     changeDisplayAndUserName(browser1NameStr);
     runInSecondBrowser(()=>{
       changeDisplayAndUserName(browser2NameStr);
@@ -1484,13 +1498,11 @@ describe('App ', function() {
         'test-tictactoe');
     });
   });
-  
-  // This test should either be fit (if you're trying to debug something) or xit (so it's excluded),
-  // because this test assumes a clean slate (it assumes no other test run before it).
-  // "f" (Focus) only on this test, and don't run other tests.
-  // "x" (Exclude) this test and run the other tests.
-  xit('Test that is either Focused or eXcluded', ()=>{
-    oneTimeInitInBothBrowsers();
+    
+  it('cleanup any remaining gameinvites', function () {
+    runInSecondBrowser(()=>{
+      loadAppAndCloseMyInfoModalAndMaybeGameinviteNotification();
+    });
   });
 });
 

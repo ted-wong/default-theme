@@ -15,6 +15,13 @@ module.exports = function(grunt) {
             'http://www.multiplayer-gaming.com/api/loader.min.js?app=v201',
             'css/app.min.css',
             'imgs/animatedEllipse.gif',
+            // For material design
+            'http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic',
+            'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js',
           ],
           network: !isForTesting ? ['*'] : 
             ['http://www.multiplayer-gaming.com/api/app.' + apiVersion + '.min.js',

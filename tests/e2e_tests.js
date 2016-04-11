@@ -150,11 +150,12 @@ var e2eTests;
         }
         extraMatchOptionsModal.expectVisible = expectVisible;
         function getGotoMain() {
-            return id('goto_main');
+            return id('extra_match_options_goto_main');
         }
         extraMatchOptionsModal.getGotoMain = getGotoMain;
         function gotoMain() {
             click(getGotoMain());
+            waitForElementToDisappear(getClose());
         }
         extraMatchOptionsModal.gotoMain = gotoMain;
         function getOpenNewMatchModal() {
@@ -180,6 +181,7 @@ var e2eTests;
         extraMatchOptionsModal.getDismissMatch = getDismissMatch;
         function dismissMatch() {
             click(getDismissMatch());
+            waitForElementToDisappear(getClose());
         }
         extraMatchOptionsModal.dismissMatch = dismissMatch;
         function getLoadNext() {
@@ -188,6 +190,7 @@ var e2eTests;
         extraMatchOptionsModal.getLoadNext = getLoadNext;
         function loadNext() {
             click(getLoadNext());
+            waitForElementToDisappear(getClose());
         }
         extraMatchOptionsModal.loadNext = loadNext;
         function getClose() {
@@ -195,7 +198,8 @@ var e2eTests;
         }
         extraMatchOptionsModal.getClose = getClose;
         function close() {
-            return click(getClose());
+            click(getClose());
+            waitForElementToDisappear(getClose());
         }
         extraMatchOptionsModal.close = close;
     })(extraMatchOptionsModal || (extraMatchOptionsModal = {}));
@@ -203,7 +207,7 @@ var e2eTests;
     var gameOverModal;
     (function (gameOverModal) {
         function expectVisible() {
-            expectDisplayed(id('close_game_over_modal'));
+            expectDisplayed(getClose());
         }
         gameOverModal.expectVisible = expectVisible;
         function getMatchOverTitle() {
@@ -228,6 +232,7 @@ var e2eTests;
         gameOverModal.getDismissAndRematch = getDismissAndRematch;
         function dismissAndRematch() {
             click(getDismissAndRematch());
+            waitForElementToDisappear(getClose());
         }
         gameOverModal.dismissAndRematch = dismissAndRematch;
         function getClose() {
@@ -236,6 +241,7 @@ var e2eTests;
         gameOverModal.getClose = getClose;
         function close() {
             click(getClose());
+            waitForElementToDisappear(getClose());
         }
         gameOverModal.close = close;
     })(gameOverModal || (gameOverModal = {}));
@@ -247,11 +253,12 @@ var e2eTests;
         }
         friendsInvitePage.expectVisible = expectVisible;
         function getGotoMain() {
-            return id('goto_main');
+            return id('invite_friends_goto_main');
         }
         friendsInvitePage.getGotoMain = getGotoMain;
         function gotoMain() {
             click(getGotoMain());
+            waitForElementToDisappear(getGotoMain());
         }
         friendsInvitePage.gotoMain = gotoMain;
         function getStartNameFilter() {
@@ -394,12 +401,17 @@ var e2eTests;
             expectDisplayed(getClose());
         }
         newMatchModal.expectVisible = expectVisible;
+        function waitTillClosed() {
+            waitForElementToDisappear(getClose());
+        }
+        newMatchModal.waitTillClosed = waitTillClosed;
         function getStartRematch() {
             return id('start_rematch');
         }
         newMatchModal.getStartRematch = getStartRematch;
         function startRematch() {
             click(getStartRematch());
+            waitTillClosed();
         }
         newMatchModal.startRematch = startRematch;
         function getStartAutoMatch() {
@@ -408,6 +420,7 @@ var e2eTests;
         newMatchModal.getStartAutoMatch = getStartAutoMatch;
         function startAutoMatch() {
             click(getStartAutoMatch());
+            waitTillClosed();
         }
         newMatchModal.startAutoMatch = startAutoMatch;
         function getGotoInviteFriends() {
@@ -432,6 +445,7 @@ var e2eTests;
         newMatchModal.getStartPractice = getStartPractice;
         function startPractice() {
             click(getStartPractice());
+            waitTillClosed();
         }
         newMatchModal.startPractice = startPractice;
         function getStartPassAndPlay() {
@@ -440,6 +454,7 @@ var e2eTests;
         newMatchModal.getStartPassAndPlay = getStartPassAndPlay;
         function startPassAndPlay() {
             click(getStartPassAndPlay());
+            waitTillClosed();
         }
         newMatchModal.startPassAndPlay = startPassAndPlay;
         function getClose() {
@@ -448,6 +463,7 @@ var e2eTests;
         newMatchModal.getClose = getClose;
         function close() {
             click(getClose());
+            waitTillClosed();
         }
         newMatchModal.close = close;
     })(newMatchModal || (newMatchModal = {}));
@@ -489,6 +505,7 @@ var e2eTests;
         playerInfoModal.getClose = getClose;
         function close() {
             click(getClose());
+            waitForElementToDisappear(getClose());
         }
         playerInfoModal.close = close;
     })(playerInfoModal || (playerInfoModal = {}));
@@ -506,6 +523,9 @@ var e2eTests;
         // Save changes done in my info modal
         function submit() {
             click(getSubmit());
+            // Submitting still keeps the modal open until we verify that the username is unique,
+            // and if it's not (and we have an e2e test for it), then it shows an error and keeps myInfoModal open.
+            // So we can't do this: waitForElementToDisappear(getSubmit());
         }
         myInfoModal.submit = submit;
         function getCancel() {
@@ -515,6 +535,7 @@ var e2eTests;
         // Cancel changes and close my info modal
         function cancel() {
             click(getCancel());
+            waitForElementToDisappear(getCancel());
         }
         myInfoModal.cancel = cancel;
         function getTitle() {
@@ -600,6 +621,7 @@ var e2eTests;
         feedbackModal.getClose = getClose;
         function close() {
             click(getClose());
+            waitForElementToDisappear(getClose());
         }
         feedbackModal.close = close;
     })(feedbackModal || (feedbackModal = {}));
@@ -768,16 +790,29 @@ var e2eTests;
     }
     function waitForElement(elem) {
         var elemName = getElementName(elem);
-        willDoLog("waitForElement " + elemName + " in " + getBrowserName(currBrowser));
+        willDoLog("waitForElement " + elemName);
         // Wait until it becomes displayed. It might not be displayed right now
         // because it takes some time to pass messages via postMessage between game and platform.
-        currBrowser.driver.wait(function () { return elem.isDisplayed(); }, 10000).then(function () {
+        currBrowser.driver.wait(function () { return elem.isDisplayed().then(function (isDisplayed) { return elem.isEnabled().then(function (isEnabled) { return isDisplayed && isEnabled; }); }); }, 10000).then(function () {
             // success
         }, function () {
             // failure
             error("Failed waitForElement: " + elemName + " args=" + JSON.stringify(arguments));
         });
         expectToBe(elem.isDisplayed(), true);
+    }
+    function waitForElementToDisappear(elem) {
+        var elemName = getElementName(elem);
+        willDoLog("waitForElementToDisappear " + elemName);
+        // Wait until it becomes displayed. It might not be displayed right now
+        // because it takes some time to pass messages via postMessage between game and platform.
+        currBrowser.driver.wait(function () { return elem.isPresent().then(function (isPresent) { return !isPresent; }); }, 10000).then(function () {
+            // success
+        }, function () {
+            // failure
+            error("Failed waitForElementToDisappear: " + elemName + " args=" + JSON.stringify(arguments));
+        });
+        expectToBe(elem.isPresent(), false);
     }
     function getElementName(elem) {
         return getBrowserName(currBrowser) + "." + elem.locator();
@@ -1103,11 +1138,13 @@ var e2eTests;
             });
             loadApp();
             notifications.expectOneNotification("PUSH_NOTIFICATION_YOUR_TURN_NOTIFICATION_TITLE", "PUSH_NOTIFICATION_YOUR_TURN_NOTIFICATION_BODY", { OPPONENT_NAME: browser2NameStr });
+            notifications.closeNotificationWithIndex(0);
             mainPage.expectMatchCounts({ yourTurn: 1, opponentTurn: 0, ended: 0 });
             dismissOnlyMatch();
             runInSecondBrowser(function () {
                 loadApp();
                 notifications.expectOneNotification("PUSH_NOTIFICATION_OPPONENT_QUIT_NOTIFICATION_TITLE", "PUSH_NOTIFICATION_OPPONENT_QUIT_NOTIFICATION_BODY", { OPPONENT_NAME: browser1NameStr });
+                notifications.closeNotificationWithIndex(0);
                 mainPage.expectMatchCounts({ yourTurn: 0, opponentTurn: 0, ended: 1 });
                 mainPage.clickMatchIndex(0);
                 // Will show gameOverModal
@@ -1226,7 +1263,7 @@ var e2eTests;
             expectDisplayed(playPage.getOpenExtraMatchOptions());
             playPage.openExtraMatchOptions().gotoMain();
         });
-        it('can make a move in a practie TicTacToe match, and restart it', function () {
+        it('can make a move in a practice TicTacToe match, and restart it', function () {
             mainPage.openNewMatchModal().startPractice();
             // Make a move in TicTacToe!
             tictactoe.run(function () {
@@ -1437,6 +1474,7 @@ var e2eTests;
                 notifications.clickNotificationWithIndex(0);
                 playPage.openInfoModalForPlayerIndex(1);
                 playerInfoModal.inviteToNewGame();
+                notifications.expectNoNotifications();
                 tictactoe.run(function () {
                     tictactoe.expectEmptyBoard();
                     tictactoe.clickDivAndExpectPiece(0, 0, 'X');

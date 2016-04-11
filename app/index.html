@@ -12,6 +12,10 @@
   <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
   <link rel="stylesheet" href="css/app.min.css"/>
 
+  <!-- CSS for material design -->
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+
 <script type="text/ng-template" id="html-templates/mainPage.html">
 <div class="header">
   <div id="test_game_name" class="game-name">{{main.game().name()}}</div>
@@ -21,8 +25,14 @@
   </div>
 </div>
 
-<div id="test_open_new_match_modal" class="button new-match-button" ng-click="main.showModal('newMatchModal')">
-  {{ 'MAIN_NEW_MATCH_GROUP_TITLE' | translate }}
+<div class="new-match-fab">
+  <md-button id="test_open_new_match_modal" class="md-fab new-match-fab" aria-label="FAB"
+      ng-click="main.showModal('newMatchModal')">
+    <md-tooltip md-direction="left">
+      {{ 'MAIN_NEW_MATCH_GROUP_TITLE' | translate }}
+    </md-tooltip>
+    <span style="font-size: 28px;">+</span>
+  </md-button>
 </div>
 
 <div ng-if="main.yourTurnMatches().length">
@@ -109,58 +119,7 @@
       <span class="topbar_toggler_span">&#10092;</span>
     </div>
   </div>
-  <!-- Extra match options Modal -->
-  <div ng-controller="ModalCtrl as modal" ng-init="modal.init('extraMatchOptionsModal')">
-    <div class="overlayModal" ng-click="modal.backdrop($event)" ng-if="modal.isShowing()" aria-hidden="true">
-      <div class="modal-dialog">
-        <div id="test_goto_main" class="menu-item" ng-click="main.changePage('/main')">
-          <div class="text">{{ 'TO_MAIN_MENU' | translate }}</div>
-        </div>
-        <div id="test_extra_match_options_open_new_match_modal" class="button new-match-button" ng-click="main.showModal('newMatchModal')">
-          {{ 'MAIN_NEW_MATCH_GROUP_TITLE' | translate }}
-        </div>
-        <div id="test_share_invite_link_with_printscreen" class="menu-item" ng-click="modal.hide(); main.shareInviteLink({takePrintscreen: true})">
-          <div class="text">{{ 'MATCH_SHARE_PRINTSCREEN' | translate }}</div>
-        </div>
-        <div id="test_dismiss_match" class="menu-item" ng-click="main.currentMatch().dismissAndLoadNextMatchOrMainPage();"
-            ng-if="!main.currentMatch().isSinglePlayer()">
-          <div class="text">{{ main.currentMatch().isOver() ? 'MATCH_DELETE' : 'MATCH_RESIGN_AND_DELETE' | translate }}</div>
-        </div>
-        <div id="test_load_next" class="menu-item" ng-click="main.currentMatch().getNextMatch().load()"
-            ng-if="main.currentMatch().getNextMatch()">
-          <div class="text">{{ 'MATCH_LOAD_NEXT' | translate }}</div>
-        </div>
-        <button id="test_close_extra_match_options_modal" type="button" class="btn btn-default" ng-click="modal.hide()">
-          {{ 'MODAL_BUTTON_CLOSE' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
-  <!-- Game over Modal (prettier than notification) -->
-  <div ng-controller="ModalCtrl as modal" ng-init="modal.init('gameOverModal')">
-    <div class="overlayModal" ng-click="modal.backdrop($event)" ng-if="modal.isShowing()" aria-hidden="true">
-      <div class="modal-dialog">
-        <h4 id="test_game_over_match_title">{{ 'MODAL_TITLE_MATCH_OVER' | translate }}</h4>
-        <div id="test_game_over_match_status">
-          {{main.currentMatch().getMatchStatusText({showDisplayName:true})}}
-        </div>
-        <button id="test_share_invite_link_after_victory" type="button" class="btn btn-primary"
-            ng-if="main.didWinMultiplayerMatch()"
-            ng-click="main.closeGameOverModal(); main.shareInviteLink({takePrintscreen: true, translationIdPrefix: 'SHARE_INTENT_WON_GAME'})">
-          {{ 'SHARE_INTENT_WON_GAME_TAKE_SCREENSHOT' | translate }}
-        </button>
-        <div id="test_game_over_rematch" class="menu-item" ng-click="main.currentMatch().startNewMatch()"
-            ng-if="main.currentMatch().canRematch()">
-          <div class="text">
-            {{ main.translateRematch() }}
-          </div>
-        </div>
-        <button id="test_close_game_over_modal" type="button" class="btn" ng-click="main.closeGameOverModal()">
-          {{ 'MODAL_BUTTON_CLOSE' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
+  
 </div>
 </script>
 
@@ -170,7 +129,7 @@
   <!-- Header with optional search. -->
 	<div class="header">
     <div class="header-inner" ng-if="!main.fb().showNameFilter()">
-      <button id="test_goto_main" class="button back-button" ng-click="main.changePage('/main')"
+      <button id="test_invite_friends_goto_main" class="button back-button" ng-click="main.changePage('/main')"
               style="height: 40px; width: 40px; margin-left: -5px; padding: 5px; font-size: 15px">
         <span class="back-button-icon"></span>
       </button>
@@ -233,7 +192,36 @@
     class="game_container overflow-y-hidden-on-play-page"
     ng-bind-html="main.game().getIframeHtml()"></div>
 
-  <!-- Starting a new match Modal -->
+  <!-- Extra match options Modal -->
+  <!-- It can't be inside a template, because then hiding the modal won't be animated, leading to a bug in ngMaterial, see https://github.com/angular/material/issues/7978 -->
+  <div ng-controller="ModalCtrl as modal" ng-init="modal.init('extraMatchOptionsModal')">
+    <div class="overlayModal" ng-click="modal.backdrop($event)" ng-if="modal.isShowing()" aria-hidden="true">
+      <div class="modal-dialog">
+        <div id="test_extra_match_options_goto_main" class="menu-item" ng-click="main.changePage('/main')">
+          <div class="text">{{ 'TO_MAIN_MENU' | translate }}</div>
+        </div>
+        <div id="test_extra_match_options_open_new_match_modal" class="button new-match-button" ng-click="main.showModal('newMatchModal')">
+          {{ 'MAIN_NEW_MATCH_GROUP_TITLE' | translate }}
+        </div>
+        <div id="test_share_invite_link_with_printscreen" class="menu-item" ng-click="modal.hide(); main.shareInviteLink({takePrintscreen: true})">
+          <div class="text">{{ 'MATCH_SHARE_PRINTSCREEN' | translate }}</div>
+        </div>
+        <div id="test_dismiss_match" class="menu-item" ng-click="main.currentMatch().dismissAndLoadNextMatchOrMainPage();"
+            ng-if="!main.currentMatch().isSinglePlayer()">
+          <div class="text">{{ main.currentMatch().isOver() ? 'MATCH_DELETE' : 'MATCH_RESIGN_AND_DELETE' | translate }}</div>
+        </div>
+        <div id="test_load_next" class="menu-item" ng-click="main.currentMatch().getNextMatch().load()"
+            ng-if="main.currentMatch().getNextMatch()">
+          <div class="text">{{ 'MATCH_LOAD_NEXT' | translate }}</div>
+        </div>
+        <button id="test_close_extra_match_options_modal" type="button" class="btn btn-default" ng-click="modal.hide()">
+          {{ 'MODAL_BUTTON_CLOSE' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Starting a new match Modal ; must be after extra match options modal since it can be opened from it. -->
   <div ng-controller="ModalCtrl as modal" ng-init="modal.init('newMatchModal')">
     <div class="overlayModal" ng-click="modal.backdrop($event)" ng-if="modal.isShowing()" aria-hidden="true">
       <div class="modal-dialog">
@@ -299,7 +287,7 @@
           </button>
         </div>
 
-        <button id="test_close_player_info" type="cancel" class="btn" ng-click="modal.hide()">
+        <button id="test_close_player_info" type="button" class="btn" ng-click="modal.hide()">
           {{ 'MODAL_BUTTON_CLOSE' | translate }}
         </button>
         <button id="test_player_info_invite_to_match" class="btn" ng-if="!main.playerInPlayerInfoModal().isUnknown()"
@@ -345,7 +333,7 @@
           <button id="test_my_info_submit" type="submit" class="btn btn-primary">
             {{ 'MODAL_BUTTON_SAVE' | translate }}
           </button>
-          <button id="test_my_info_cancel" type="cancel" class="btn" ng-click="modal.hide()">
+          <button id="test_my_info_cancel" type="button" class="btn" ng-click="modal.hide()">
             {{ 'MODAL_BUTTON_CLOSE' | translate }}
           </button>
         </form>
@@ -367,17 +355,58 @@
       </div>
     </div>
   </div>
+  
+  <!-- Game over Modal (prettier than notification) -->
+  <!-- It can't be inside a template, because then hiding the modal won't be animated, leading to a bug in ngMaterial, see https://github.com/angular/material/issues/7978 -->
+  <div ng-controller="ModalCtrl as modal" ng-init="modal.init('gameOverModal')">
+    <div class="overlayModal" ng-click="modal.backdrop($event)" ng-if="modal.isShowing()" aria-hidden="true">
+      <div class="modal-dialog">
+        <h4 id="test_game_over_match_title">{{ 'MODAL_TITLE_MATCH_OVER' | translate }}</h4>
+        <div id="test_game_over_match_status">
+          {{main.currentMatch().getMatchStatusText({showDisplayName:true})}}
+        </div>
+        <button id="test_share_invite_link_after_victory" type="button" class="btn btn-primary"
+            ng-if="main.didWinMultiplayerMatch()"
+            ng-click="main.closeGameOverModal(); main.shareInviteLink({takePrintscreen: true, translationIdPrefix: 'SHARE_INTENT_WON_GAME'})">
+          {{ 'SHARE_INTENT_WON_GAME_TAKE_SCREENSHOT' | translate }}
+        </button>
+        <div id="test_game_over_rematch" class="menu-item" ng-click="main.currentMatch().startNewMatch()"
+            ng-if="main.currentMatch().canRematch()">
+          <div class="text">
+            {{ main.translateRematch() }}
+          </div>
+        </div>
+        <button id="test_close_game_over_modal" type="button" class="btn" ng-click="main.closeGameOverModal()">
+          {{ 'MODAL_BUTTON_CLOSE' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script crossorigin="anonymous" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
 
 <script crossorigin="anonymous" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.min.js"></script>
 
+<!-- Angular Material dependencies & libraries -->
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+  
 <script crossorigin="anonymous" src="http://www.multiplayer-gaming.com/api/loader.min.js?app=v201"></script>
 
 <script>
 function gamingPlatformInitFinished() {
-  angular.module('whateverNameApp', ["gamingPlatformModule"]);
+  angular.module('whateverNameApp', ["gamingPlatformModule", 'ngMaterial'])
+      .config(['$mdThemingProvider', '$mdIconProvider', 
+        function ($mdThemingProvider, $mdIconProvider) {
+          $mdThemingProvider
+              .theme('default')
+              .primaryPalette('brown')
+              .accentPalette('red');
+        }]);
   angular.bootstrap(document, ["whateverNameApp"]);
 }
 </script>

@@ -190,10 +190,13 @@ otherwise({redirectTo: '/main'});
   <h1>[Optional] iOS push notifications</h1>
   <div class="form-group">
     <label>
-      Your iOS key-store P12 file, used for sending Push Notifications on iOS:
-      <input type="file" accept="*.p12" class="form-control" fileread="developerGame.game.productionIosKeystoreP12Base64" placeholder="Your production iOS key-store P12 file for APNS authentication for Push notifications">
+      Your iOS key-store P12 file, used for sending Push Notifications on iOS:<br>
+      <div ng-if = "!developerGame.game.productionIosKeystoreP12Base64">
+        <input type="file" accept="*.p12" class="form-control" fileread="developerGame.game.productionIosKeystoreP12Base64" placeholder="Your production iOS key-store P12 file for APNS authentication for Push notifications">
+      </div>
       <div ng-if = "developerGame.game.productionIosKeystoreP12Base64">
-        (File size is {{developerGame.base64OriginalSizeKb(developerGame.game.productionIosKeystoreP12Base64)}}KB.)
+        File size is {{developerGame.base64OriginalSizeKb(developerGame.game.productionIosKeystoreP12Base64)}}KB.
+        <button type="button" class="btn" ng-click="developerGame.clearProductionIosKeystore()">Remove file</button>
       </div>
     </label>
   </div>

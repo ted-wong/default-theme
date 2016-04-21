@@ -363,7 +363,7 @@
         },
         "MATCH_START_REMATCH": {
             "en": "Rematch: start a new game with {{OPPONENTS_NAME}}",
-            "iw": "התחל משחק חדש עם {{OPPONENTS_NAME}",
+            "iw": "התחל משחק חדש עם {{OPPONENTS_NAME}}",
             "pt": "Revanche: começar um novo jogo com {{OPPONENTS_NAME}}",
             "zh": "新比赛：与{{OPPONENTS_NAME}}开始新游戏",
             "el": "Ρεβάνς: ξεκινήσετε ένα νέο παιχνίδι με {{OPPONENTS_NAME}}",
@@ -445,7 +445,7 @@
             "en": "{{OPPONENT_NAME}} won",
             "iw": "{{OPPONENT_NAME}} נצח",
             "pt": "{{OPPONENT_NAME}} ganhou",
-            "zh": "{OPPONENT_NAME}}贏了",
+            "zh": "{{OPPONENT_NAME}}贏了",
             "el": "Ο/Η {{OPPONENT_NAME}} κέρδισε",
             "fr": "{{OPPONENT_NAME}} a gagné",
             "hi": "{{OPPONENT_NAME}} जीता",
@@ -633,7 +633,7 @@
         },
         "PUSH_NOTIFICATION_CHAT_MESSAGE_NOTIFICATION_TITLE": {
             "en": "Message from {{OPPONENT_NAME}}:",
-            "iw": "הודעה מ {{OPPONENTS_NAME}",
+            "iw": "הודעה מ {{OPPONENT_NAME}}",
             "pt": "Mensagem de {{OPPONENT_NAME}}:",
             "zh": "来自{{OPPONENT_NAME}}的消息",
             "el": "Μήνυμα από {{OPPONENT_NAME}}:",
@@ -668,7 +668,7 @@
             "zh": "{{OPPONENT_NAME}}贏了",
             "el": "Ο/Η \t{{OPPONENT_NAME}} κέρδισε",
             "fr": "{{OPPONENT_NAME}} a gagné",
-            "hi": "{{ OPPONENT_NAME }} जीता",
+            "hi": "{{OPPONENT_NAME}} जीता",
             "es": "{{OPPONENT_NAME}} ganó"
         },
         "PUSH_NOTIFICATION_MATCH_ENDED_YOU_LOST_NOTIFICATION_TITLE": {

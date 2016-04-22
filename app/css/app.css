@@ -425,17 +425,30 @@ img.hero {
 }
 /* This animation to slowly hide&show modal dialogs
   is critical to prevent a bug due to ngMaterial,
-  see https://github.com/angular/material/issues/7978 */
+  see https://github.com/angular/material/issues/7978 
+  I don't set this animation for all enter/leave, because that makes page transitions very akward.
+  So I set it for modal dialogs, notifications.
+  */
 .overlayModal.ng-enter, .overlayModal.ng-leave {
-  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.3s;
 }
-.overlayModal.ng-enter,
-.overlayModal.ng-leave.ng-leave-active {
+.overlayModal.ng-enter, .overlayModal.ng-leave.ng-leave-active {
   opacity:0;
 }
-.overlayModal.ng-leave,
-.overlayModal.ng-enter.ng-enter-active {
+.overlayModal.ng-leave, .overlayModal.ng-enter.ng-enter-active {
   opacity:1;
+}
+
+.notification.ng-enter, .notification.ng-leave {
+  transition:all cubic-bezier(0.55, 0, 0.55, 0.2) 0.3s;
+}
+.notification.ng-enter, .notification.ng-leave.ng-leave-active {
+  opacity:0;
+  transform: translate3d(0, -100%, 0);
+}
+.notification.ng-leave, .notification.ng-enter.ng-enter-active {
+  opacity:1;
+  transform: translate3d(0, 0, 0);
 }
 
 .game_header {

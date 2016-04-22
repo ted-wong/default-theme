@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Game Invite</title>
   <meta name="description" content="Game Invite">
-  <link rel="shortcut icon"type="image/x-icon" href="data:image/x-icon;,"><!-- Suppress browser request for favicon.ico -->
+  <link rel="shortcut icon"type="image/x-icon" href="imgs/icon-play.png">
 
   <!-- To ensure CSS files are downloaded in parallel, always include external CSS before external JavaScript. -->
   <link rel="stylesheet" href="css/index.min.css"/>
@@ -38,8 +38,8 @@
     </td>
   </table>
 
-  <div class="horizontal-center">{{'GAME_INVITE_INSTALL_APP_FROM' | translate}}</div>
   <div ng-if="!main.isMobile()" class="horizontal-center">
+    <div class="horizontal-center">{{'GAME_INVITE_INSTALL_APP_FROM' | translate}}</div>
     <button id="test_open_apple_appstore" ng-if="main.hasIosApp()" class="btn btn-primary"
         ng-click="main.openLocation('APPLE')">
       {{'GAME_INVITE_INSTALL_APP_FROM_APPLE_APPSTORE' | translate}}

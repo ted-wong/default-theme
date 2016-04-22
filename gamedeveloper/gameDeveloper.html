@@ -341,12 +341,32 @@ otherwise({redirectTo: '/main'});
     Test your 
       <a href="{{developerGame.game.themeBaseUrl}}app/index.html" target="_blank">app</a>
       and
-      <a href="{{developerGame.game.themeBaseUrl}}gameinvite/index.html" target="_blank">gameinvite</a>
+      <a href="{{developerGame.game.themeBaseUrl}}/index.html" target="_blank">gameinvite</a>
       (and
       <a href="{{developerGame.game.themeBaseUrl}}gamedeveloper/gameDeveloper.html" target="_blank">gamedeveloper</a>
       ).
       </div>
   </div>
+  
+  <div class="form-group">
+    <label>
+      Gameinvite URL (e.g., <code>http://gameinvite.us/</code>).
+      The URL must match <code>http://SOMETHING/</code>:<br>
+      <input size="80" type="url" class="form-control" ng-model="developerGame.game.themeGameinviteUrl" pattern="^http[:][/][/].+[/]$" placeholder="http://gameinvite.us/">
+    </label>
+  </div>
+  <div class="form-group">
+    <label>
+      <input type="checkbox" ng-model="developerGame.game.omitGameNameFromGameinviteUrl">
+      Should the platform OMIT the lowercase game name in gameinvite URL? 
+      (Only check this if you know what you're doing! 
+      See <a href="https://github.com/yoav-zibin/ycheckers.us/blob/gh-pages/index.html" target="_blank">ycheckers.us example</a>.)
+    </label>
+  </div>
+    <div ng-if="developerGame.game.themeGameinviteUrl">
+      <a href="{{developerGame.game.themeGameinviteUrl}}?yoav.zibin{{developerGame.game.omitGameNameFromGameinviteUrl ? '' : '=' + developerGame.game.lowercaseGameName}}" 
+        target="_blank">Test your gameinvite URL</a>  
+    </div>
   
   <h4>[Optional] Localized text used in push notifications</h4>
   After forking 

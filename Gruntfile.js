@@ -18,6 +18,7 @@ module.exports = function(grunt) {
             // For material design
             'http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic',
             'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.css',
+            'http://fonts.googleapis.com/icon?family=Material+Icons',
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js',
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js',
             'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.js',

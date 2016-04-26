@@ -939,8 +939,8 @@ describe('App ', function() {
     // The real width&height are set in protractor.conf:
     // 'chromeOptions': { "mobileEmulation": { "deviceName": "Apple iPhone 4" } }
     // So this size just needs to be bigger than 320x(480+address-bar+chrome-tabs)
-    //var widthAndHeight = getDeviceMetrics();
-    //b.driver.manage().window().setSize(widthAndHeight.width, widthAndHeight.height + 100);
+    var widthAndHeight = getDeviceMetrics();
+    b.driver.manage().window().setSize(widthAndHeight.width + 20, widthAndHeight.height + 100);
   }
   function expectEmptyBrowserLogs(b: protractor.Protractor) {
     b.manage().logs().get('browser').then(function(browserLog) {

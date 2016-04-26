@@ -39,7 +39,7 @@ module.exports = function(grunt) {
   }
   
   var desiredPrintscreens = [
-    'iPhone4', 'iPhone5', 'iPhone6', 'iPhone6Plus', 'iPad', 'iPadPro', 'Nexus5', 'Nexus10',
+    'iPhone4', 'iPhone5', 'iPhone6', 'iPhone6Plus', 'iPad', 'iPadPro', 'Nexus5', 'Nexus7',
   ];
   
   

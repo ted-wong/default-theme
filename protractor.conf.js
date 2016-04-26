@@ -30,7 +30,7 @@ var supportedDevices = {
     dirName: "Nexus5-[360x640]x3",
     deviceMetrics: { width: 360 , height: 640, pixelRatio: 2, desiredPixelRatio: 3}, // pixelRatio should be 3
   },
-  Nexus10: {
+  Nexus7: {
     dirName: "Nexus7-[600x960]x2",
     deviceMetrics: { width: 600 , height: 960, pixelRatio: 2},
   },

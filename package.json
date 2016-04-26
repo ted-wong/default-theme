@@ -18,8 +18,9 @@
     "http-server": "*",
     "jasmine-core": "*",
     "load-grunt-tasks": "*",
-    "typescript": "*",
-    "protractor": "*"
+    "png-image": "*",
+    "protractor": "*",
+    "typescript": "*"
   },
   "scripts": {
     "postinstall": "webdriver-manager update",

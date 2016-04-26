@@ -298,24 +298,14 @@
     "es": "Practicar"
   },
   "MAIN_SHARE_INVITE_LINK_TITLE": {
-    "en": "Share an invite link with your friends",
-    "iw": "שתף הזמנה למשחק עם חבריך",
+    "en": "Share an invite link",
+    "iw": "שתף הזמנה למשחק",
     "pt": "Compartilhar um link de convite com os seus amigos",
     "zh": "分享链接给你的好友",
     "el": "Μοιραστείτε ένα σύνδεσμο πρόσκλησης με τους φίλους σας",
     "fr": "partager une invitation avec vos amis",
     "hi": "खेल आमंत्रण का लिंक अपने दोस्तों को भेजें ",
     "es": "Compartir un link de invitacion con tus amigos."
-  },
-  "MATCH_ALSO_DELETE": {
-    "en": "Also delete game",
-    "iw": "גם מחק את המשחק",
-    "pt": "Também eliminar jogo",
-    "zh": "并且删除当前游戏",
-    "el": "Επίσης, διαγράψτε το παιχνίδι",
-    "fr": "effacer aussi la partie",
-    "hi": "और खेल ख़ारिज करें ",
-    "es": "Tambien borrar juego"
   },
   "MATCH_DELETE": {
     "en": "Delete game",

@@ -10,17 +10,17 @@ module.exports = function(grunt) {
         options: {
           basePath: '.',
           cache: [
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.min.js',
             'http://www.multiplayer-gaming.com/api/loader.min.js?app=v201',
             'css/app.min.css',
             'imgs/animatedEllipse.gif',
             // For material design
             'http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic',
             'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.css',
-            'http://fonts.googleapis.com/icon?family=Material+Icons',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js',
-            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js',
+            'http://fonts.gstatic.com/s/materialicons/v15/2fcrYFNaTjcS6g4U3t-Y5StnKWgpfO2iSkLzTz-AABg.ttf',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js',
+            'http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js',
             'http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc4/angular-material.min.js',
           ],
           network: !isForTesting ? ['*'] : 
@@ -36,6 +36,32 @@ module.exports = function(grunt) {
         dest: 'app/index.appcache',
         src: isForTesting ? ['app/imgs/*.*'] : [],
       };
+  }
+  
+  var desiredPrintscreens = [
+    'iPhone4', 'iPhone5', 'iPhone6', 'iPhone6Plus', 'iPad', 'iPadPro', 'Nexus5', 'Nexus10',
+  ];
+  
+  
+  function getProtractorConf(deviceName) {
+    return {
+      options: {
+        configFile: "protractor.conf.js", // Default config file
+        keepAlive: false, // If false, the grunt process stops when the test fails.
+        noColor: false, // If true, protractor will not use colors in its output.
+        args: {
+          params: {deviceName: deviceName}
+        }
+      }
+    };
+  } 
+  
+  var protractorConf = {};
+  var allProtractorTasks = [];
+  for (var i = 0; i < desiredPrintscreens.length; i++) {
+    var deviceName = desiredPrintscreens[i];
+    protractorConf[deviceName] = getProtractorConf(deviceName);
+    allProtractorTasks.push('protractor:' + deviceName);
   }
   
   grunt.initConfig({
@@ -90,17 +116,7 @@ module.exports = function(grunt) {
             runInBackground: true
         }
     },
-    protractor: {
-      options: {
-        configFile: "protractor.conf.js", // Default config file
-        keepAlive: false, // If false, the grunt process stops when the test fails.
-        noColor: false, // If true, protractor will not use colors in its output.
-        args: {
-          // Arguments passed to the command
-        }
-      },
-      all: {}
-    },
+    protractor: protractorConf,
   });
 
   require('load-grunt-tasks')(grunt);
@@ -109,10 +125,14 @@ module.exports = function(grunt) {
       'ts',
       'postcss',
       'manifest:forTesting',
-      'http-server', 'protractor',
+      'http-server', 'protractor:iPhone4',
       'manifest:forProduction']);
   grunt.registerTask('skipProtractor', ['ts',
       'postcss',
       'manifest:forProduction']);
-
+  grunt.registerTask('createPrintscreens', ['ts',
+      'postcss',
+      'manifest:forTesting',
+      'http-server'].concat(allProtractorTasks).concat([
+      'manifest:forProduction']));
 };

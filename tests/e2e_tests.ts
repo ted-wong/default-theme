@@ -56,7 +56,7 @@ Logging.addLoggin("gameinvitePage", gameinvitePage);
 
 module mainPage {
   export function expectVisible() {
-    expectDisplayed(getOpenNewMatchModal());
+    expectDisplayed(getMyAvatarImg());
   }
   
   export function getGameName() {
@@ -69,14 +69,6 @@ module mainPage {
   export function openMyInfoModal() {
     click(getMyAvatarImg());
     return myInfoModal;
-  }
-  
-  export function getOpenNewMatchModal() {
-    return id('open_new_match_modal');
-  }
-  export function openNewMatchModal() {
-    click(getOpenNewMatchModal());
-    return newMatchModal;
   }
   
   export function expectNoMatches() {
@@ -139,14 +131,6 @@ module extraMatchOptionsModal {
   export function gotoMain() {
     click(getGotoMain());
     waitForElementToDisappear(getClose());
-  }
-  
-  export function getOpenNewMatchModal() {
-    return id('extra_match_options_open_new_match_modal');
-  }
-  export function openNewMatchModal() {
-    click(getOpenNewMatchModal());
-    return newMatchModal;
   }
   
   export function getSharePrintscreen() {
@@ -354,11 +338,21 @@ Logging.addLoggin("notifications", notifications);
 
 module newMatchModal {
   export function expectVisible() {
-    expectDisplayed(getClose());
+    expectDisplayed(getStartAutoMatch());
   }
   export function waitTillClosed() {
-    waitForElementToDisappear(getClose());
+    waitForElementToDisappear(getStartAutoMatch());
   }
+  
+  export function getOpenNewMatchModal() {
+    return id('open_new_match_modal');
+  }
+  export function openNewMatchModal() {
+    click(getOpenNewMatchModal());
+    expectVisible();
+    return newMatchModal;
+  }
+  
   
   export function getStartRematch() {
     return id('start_rematch');
@@ -403,14 +397,6 @@ module newMatchModal {
   }
   export function startPassAndPlay() {
     click(getStartPassAndPlay());
-    waitTillClosed();
-  }
-  
-  export function getClose() {
-    return id('close_new_match_modal');
-  }
-  export function close() {
-    click(getClose());
     waitTillClosed();
   }
 }
@@ -657,6 +643,7 @@ module JasmineOverrides {
 }
 
 declare var require: (module: string) => any;
+declare var Buffer: any;
 
 // Common functions
 let currBrowser: protractor.Protractor = browser;
@@ -734,14 +721,20 @@ function waitForElementToDisappear(elem: protractor.ElementFinder) {
   willDoLog("waitForElementToDisappear " + elemName);
   // Wait until it becomes displayed. It might not be displayed right now
   // because it takes some time to pass messages via postMessage between game and platform.
-  currBrowser.driver.wait(()=>elem.isPresent().then((isPresent)=>!isPresent), 10000).then(
+  currBrowser.driver.wait(()=>elem.isPresent().then(
+      (isPresent)=>isPresent ? 
+        elem.isDisplayed().then((isDisplayed)=>!isDisplayed,
+        // isDisplayed() can result in NoSuchElementError, and then I return false so wait will call this method again.
+        // (It's a weird race condition when I do animation to hide modals/menus: 
+        //  the element isPresent, but by the time that protractor checks if it's Displayed, then it's already not present.) 
+        (error: any)=>false) : !isPresent), 10000).then(
     ()=>{
       // success
     }, function () {
       // failure
       error("Failed waitForElementToDisappear: " + elemName + " args=" + JSON.stringify(arguments));
     });
-  expectToBe(elem.isPresent(), false);
+  // Element is either not present or not displayed.
 }
 
 function getElementName(elem: protractor.ElementFinder) {
@@ -910,6 +903,27 @@ describe('App ', function() {
     checkInvariantsInAllBrowsers(true);
   }
 
+  interface DeviceParams {
+    dirName: string;
+    deviceMetrics: DeviceMetrics;
+  } 
+  interface DeviceMetrics { 
+    width: number;
+    height: number;
+    pixelRatio: number;
+  }
+  
+  function getDeviceParams(): DeviceParams {
+    //console.log("\n\n\nXXXXX\n\n\nbrowser.params=" + JSON.stringify(browser.params));
+    return browser.params.supportedDevices[browser.params.deviceName];
+  }
+  function getDeviceDirName() {
+    return getDeviceParams().dirName;
+  }
+  function getDeviceMetrics() {
+    return getDeviceParams().deviceMetrics;
+  }
+  
   setPosition(browser, 0, 0);
   setPosition(secondBrowser, 450, 0);
   setSize(browser);
@@ -925,7 +939,8 @@ describe('App ', function() {
     // The real width&height are set in protractor.conf:
     // 'chromeOptions': { "mobileEmulation": { "deviceName": "Apple iPhone 4" } }
     // So this size just needs to be bigger than 320x(480+address-bar+chrome-tabs)
-    b.driver.manage().window().setSize(400, 600);
+    //var widthAndHeight = getDeviceMetrics();
+    //b.driver.manage().window().setSize(widthAndHeight.width, widthAndHeight.height + 100);
   }
   function expectEmptyBrowserLogs(b: protractor.Protractor) {
     b.manage().logs().get('browser').then(function(browserLog) {
@@ -977,7 +992,7 @@ describe('App ', function() {
     if (retryNumber >= 5) {
       throw new Error("Tried already 5 times to create an auto-match with an unknown opponent");
     }
-    mainPage.openNewMatchModal().startAutoMatch();
+    newMatchModal.openNewMatchModal().startAutoMatch();
   }
 
   function makeMoveAndDismissMatch() {
@@ -1017,8 +1032,7 @@ describe('App ', function() {
           tictactoe.clickDivAndExpectPiece(1, 1, ""); // You can only make one move (double checking it's not single player)
         });
         notifications.expectMoveSent_CreateNewMatch();
-        notifications.clickNotificationWithIndex(0);
-        newMatchModal.close();
+        notifications.closeNotificationWithIndex(0);
         playPage.openExtraMatchOptions().gotoMain();
         continueAfterAutoMatch();
       }
@@ -1212,7 +1226,7 @@ describe('App ', function() {
   });
 
   it('can go to practice play page, click on back button and it will go back to main menu', ()=>{
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     currBrowser.navigate().back();
     mainPage.expectVisible();
   });
@@ -1223,7 +1237,7 @@ describe('App ', function() {
   });
 
   it('can toggle top bar (in practice play page)', ()=>{
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     playPage.toggleTopBar();
     expectNotPresent(playPage.getOpenExtraMatchOptions());
     playPage.toggleTopBar();
@@ -1232,7 +1246,7 @@ describe('App ', function() {
   });
 
   it('can make a move in a practice TicTacToe match, and restart it', ()=>{
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     // Make a move in TicTacToe!
     tictactoe.run(()=>{
       tictactoe.expectEmptyBoard();
@@ -1243,7 +1257,7 @@ describe('App ', function() {
       tictactoe.expectPiece(0, 0, 'O'); // AI played at position 0x0
     });
     // Restart a new practice match.
-    playPage.openExtraMatchOptions().openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     tictactoe.run(()=>{
       tictactoe.expectEmptyBoard();
     });
@@ -1251,7 +1265,7 @@ describe('App ', function() {
   });
 
   it('can finish a passAndPlay TicTacToe match, restart it, and go back to main menu', ()=>{
-    mainPage.openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     tictactoe.run(()=>{
       tictactoe.expectEmptyBoard();
       // End game with X winning.
@@ -1274,7 +1288,7 @@ describe('App ', function() {
       tictactoe.clickDivAndExpectPiece(1, 1, "O");
     });
     // Restart passAndPlay
-    playPage.openExtraMatchOptions().openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     tictactoe.run(()=>{
       tictactoe.expectEmptyBoard();
     });
@@ -1282,17 +1296,17 @@ describe('App ', function() {
   });
   
   it('from darrenlevy@: can go to passAndPlay, make move, go to Invite Friends and go back to main menu', ()=>{
-    mainPage.openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     tictactoe.run(()=>{
       tictactoe.clickDivAndExpectPiece(0, 0, 'X');
     });
-    playPage.openExtraMatchOptions().openNewMatchModal().gotoInviteFriends();
+    newMatchModal.openNewMatchModal().gotoInviteFriends();
     friendsInvitePage.gotoMain();
     mainPage.expectVisible();
   });
   
   it('from Prasoon Goyal & Rachita Hajela: can go to practice, open game invite in 2nd browser, back to main menu', ()=> {
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     runInSecondBrowser(()=>{
       getPage('/gameinvite/?' + browser1NameStr + '=testtictactoe');
       let interpolationParams = {GAME_NAME: "test-tictactoe", PLAYER_NAME: browser1NameStr};
@@ -1306,7 +1320,7 @@ describe('App ', function() {
   });
   
   it('from DiegoRincon: can finish a practice TicTacToe match and go back to main menu', function () {
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     tictactoe.run(function () {
         tictactoe.expectEmptyBoard();
         tictactoe.clickDivAndExpectPiece(1, 0, "X");
@@ -1327,7 +1341,7 @@ describe('App ', function() {
   });
 
   it('from ismailmustafa and pdhar (team Carrom)@: can finish a passAndPlay match, go to the main menu, finish a practice match, and go back to main menu', ()=>{
-    mainPage.openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     
     // Run game to completion
     tictactoe.run(()=>{
@@ -1352,7 +1366,7 @@ describe('App ', function() {
     playPage.openExtraMatchOptions().gotoMain();
     
     // Start a practice match
-    mainPage.openNewMatchModal().startPractice();
+    newMatchModal.openNewMatchModal().startPractice();
     tictactoe.run(()=>{
       tictactoe.clickDivAndExpectPiece(1, 1, 'X');
       currBrowser.driver.wait(protractor.until.elementsLocated(by.id('e2e_test_pieceO_0x0')), 10000);
@@ -1373,7 +1387,7 @@ describe('App ', function() {
   });
   
   it('from pioneers team (Hung-Ting Wen): single-player game ends in win/lose', ()=> {
-    mainPage.openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     tictactoe.run(()=>{
       /**
        * First test case: X won
@@ -1421,7 +1435,7 @@ describe('App ', function() {
   });
   
   it('from pioneers team (Hung-Ting Wen): single player game ends in a tie', ()=> {
-    mainPage.openNewMatchModal().startPassAndPlay();
+    newMatchModal.openNewMatchModal().startPassAndPlay();
     tictactoe.run(()=>{
       /**
        * Third test case: tie
@@ -1486,7 +1500,6 @@ describe('App ', function() {
       l10n.expectTranslate(gameinvitePage.getInviteText(), translationId, interpolationParams);
       loadApp();
       notifications.expectOneNotification('IN_APP_NOTIFICATION_GAME_INVITE_TITLE', 'IN_APP_NOTIFICATION_GAME_INVITE_BODY', interpolationParams);
-      // to-do: actually start a match from gameinvite.
       notifications.closeNotificationWithIndex(0);
     });
   });
@@ -1542,6 +1555,73 @@ describe('App ', function() {
   it('cleanup any remaining gameinvites', function () {
     runInSecondBrowser(()=>{
       loadAppAndCloseMyInfoModalAndMaybeGameinviteNotification();
+    });
+  });
+  
+  
+  //GAME_ID = "5125637257822208-7"; // yCheckers by Yoav Zibin
+  xit('Make printscreens for app submission', function () {
+    let fs = require('fs');
+    function createDir(dir: string) {
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+    }
+    function takeScreenshot(filename: string) {
+      currBrowser.takeScreenshot().then(function(png: string) {
+        let dirName = getDeviceDirName();
+        let deviceMetrics = getDeviceMetrics();
+        createDir("printscreens/");
+        var dir = "printscreens/" + dirName + "/";
+        createDir(dir);
+        var target = dir + filename;
+        var stream = fs.createWriteStream(target);
+        stream.write(new Buffer(png, 'base64'));
+        stream.end();
+        
+        var PNGImage = require('png-image');
+        var pngImage = new PNGImage({
+            imagePath: target,
+            imageOutputPath: target,
+            cropImage: {x: 0, y: 0, width: deviceMetrics.width * deviceMetrics.pixelRatio, height: deviceMetrics.height * deviceMetrics.pixelRatio}
+        });
+        pngImage.run(function (err: any) {
+            if (err) {
+                console.log(err);
+            }
+        });
+      });
+    }
+    let firstBrowserDisplayName = "Yoav Zibin";
+    function setDisplayName() {
+      mainPage.openMyInfoModal().setNewDisplayName(firstBrowserDisplayName);
+      myInfoModal.setNewUserName(browser1NameStr);
+      myInfoModal.submit();
+      currBrowser.sleep(1000); // to let AppEngine propogate the new username (so /gameinvite/? will find it).
+    }
+    setDisplayName();
+    
+    runInSecondBrowser(()=>{
+      getPage('/gameinvite/?' + browser1NameStr + '=draughts');
+      let interpolationParams = {GAME_NAME: "yCheckers", PLAYER_NAME: firstBrowserDisplayName};
+      let translationId = "GAME_INVITE_PLAYER_NAME_WANTS_TO_PLAY_GAME_NAME_WITH_YOU";
+      l10n.expectTranslate(gameinvitePage.getInviteText(), translationId, interpolationParams);
+      loadApp();
+      myInfoModal.cancel();
+      notifications.expectOneNotification('IN_APP_NOTIFICATION_GAME_INVITE_TITLE', '');
+      takeScreenshot("WasInvited.png");
+      notifications.clickNotificationWithIndex(0);
+      playPage.expectVisible();
+      takeScreenshot("GameInInitialPosition.png");
+      playPage.openExtraMatchOptions().gotoMain();
+      newMatchModal.openNewMatchModal();
+      takeScreenshot("NewMatchMenu.png");
+      newMatchModal.startPractice();
+      playPage.openExtraMatchOptions().gotoMain();
+      mainPage.clickMatchIndex(0);
+      playPage.openExtraMatchOptions().dismissMatch();
+      mainPage.expectVisible();
+      mainPage.expectNoMatches();
     });
   });
 });

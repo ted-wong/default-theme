@@ -10,6 +10,7 @@ interface App {
   l10n(): L10n;
   fb(): FB;
   model(): Model; // All fields used in ng-model
+  returnTrue(ignored: any): boolean; // To avoid warnings from my $parse proxy that warns if an expression results in undefined.
 
   // Will be set to true after the game and player
   // were loaded (from local-storage or the server).
@@ -57,7 +58,7 @@ interface App {
 
   // Modal dialogs
   // The UI currently has these modal names:
-  // playerInfoModal, myInfoModal, gameOverModal, feedbackModal, newMatchModal
+  // playerInfoModal, myInfoModal, gameOverModal, feedbackModal
   // (you can add any other modal name you like)
   // Returns true if the modal is showing.
   isModalShowing(modalName: string): boolean;

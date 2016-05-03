@@ -13,6 +13,12 @@
   src: local('Material Icons'), local('MaterialIcons-Regular'),
     url(http://fonts.gstatic.com/s/materialicons/v15/2fcrYFNaTjcS6g4U3t-Y5StnKWgpfO2iSkLzTz-AABg.ttf) format('truetype');
 }
+@font-face {
+  font-family: title_font;
+  font-style: normal;
+  font-weight: 100;
+  src: url(../The_Goldsmith_Vintage.ttf) format('truetype');
+}
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -46,6 +52,7 @@ html, body {
 }
 body {
   font-family: 'Arial', 'Gotham','Varela Round', sans-serif;
+  font-family: 'title_font';
   -moz-font-smoothing: antialiased; /* still no non-prefixed version... */
   -webkit-font-smoothing: antialiased; /* still no non-prefixed version... */
 }
@@ -201,14 +208,17 @@ img.hero {
   color: #fff;
   flex-grow: 1;
   font-weight: bold;
-  font-size: 35px;
+  font-size: 45px;
   padding-left: 25px;
+  font-family: title_font;
+  color: #ebd917;
+
 }
 
 .main-avatar-container {
   flex-grow: 1;
   text-align: right;
-  padding-right: 35px;
+  padding-right: 20px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -389,6 +399,7 @@ img.hero {
 }
 .next-player {
   background-color: #fff;
+  background-image: url(../imgs/harbor2.jpg);
   border-radius: 5px;
   padding: 10px;
   display: flex;
@@ -429,6 +440,10 @@ img.hero {
   height: auto;
   position: absolute;
   bottom: 0;
+}
+
+#test1 {
+  background-image: url(../imgs/water1.jpg);
 }
 
 #game_iframe {
@@ -509,7 +524,7 @@ img.hero {
 }
 
 
-.closed_header .topbar_toggler_span {
+.header_false .topbar_toggler_span {
   transform: rotate(270deg);
 }
 
@@ -638,6 +653,68 @@ img.hero {
 
 .new-match-fab {
   position: fixed;
-  right: 10px;
-  bottom: 10px;
+  right: 15px;
+  bottom: 15px;
+}
+
+.md-tab{
+  text-transform: none;
+    font-size: 25px;
+}
+
+.match .subtitle {
+	font-size: 19px;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;
+	-webkit-text-fill-color: black;
+	
+}
+
+md-tabs-canvas {
+  background-image: url(../imgs/harbor2.jpg);
+}
+
+#background0 {
+  background-image: url(../imgs/terrain0.jpg);
+}
+#background1 {
+  background-image: url(../imgs/terrain1.jpg);
+  color: white;
+}
+#background2 {
+  background-image: url(../imgs/terrain2.jpg);
+}
+#background3 {
+  background-image: url(../imgs/terrain3.jpg);
+}
+#background4 {
+  background-image: url(../imgs/terrain4.jpg);
+}
+
+.header {
+  background-image: url(../imgs/terrain7.jpg);
+  color: '#ebd917';
+}
+
+.game_header_inner {
+  background-image: url(../imgs/terrain7.jpg);
+}
+
+.topbar_toggler {
+  background-image: url(../imgs/harbor2.jpg);
+}
+
+md-menu-content {
+  background-image: url(../imgs/harbor2.jpg);
+}
+md-menu-item>.md-button {
+  font-size: 19px;
+}
+
+#test_open_extra_match_options_modal {
+  background-image: url(../imgs/harbor2.jpg);
+}
+
+.menu-item .text {
+	font-size: 18px;
 }
